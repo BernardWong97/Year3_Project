@@ -31,4 +31,4 @@ Need to deside:
 - Finalize how our git repo should be structured (folder structure)
 - Deside on front-end (do we need it? what kind of info it should display?)
 
-We aggread to prove what we lerned Rust we need to create small project in Rust.
+We aggread to prove what we lerned Rust we need to create small project in Rust. But we need to deside what kind of project we should do.
