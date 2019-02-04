@@ -36,4 +36,4 @@ Few personal goals:
 
 ##### Rust language
 - [The Book](https://doc.rust-lang.org/book/ch01-00-getting-started.html)
--
+- [Rust Docks](https://doc.rust-lang.org/1.2.0/book/ffi.html)

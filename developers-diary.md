@@ -30,3 +30,5 @@ Need to deside:
 - What kind of data we want to store on BlockChain.
 - Finalize how our git repo should be structured (folder structure)
 - Deside on front-end (do we need it? what kind of info it should display?)
+
+We aggread to prove what we lerned Rust we need to create small project in Rust.
