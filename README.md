@@ -16,6 +16,11 @@ Few personal goals:
   - Scala
 - Use Docker (Kubernetes)
 
+### About Rust
+Rust is staticly typed language.
+- ["The primary situation in which you’d use isize or usize is when indexing some sort of collection."](https://doc.rust-lang.org/book/ch03-02-data-types.html)
+- ["This is called destructuring, because it breaks the single tuple into three parts."](https://doc.rust-lang.org/book/ch03-02-data-types.html)
+
 
 ### Resourses
 ##### Docker
