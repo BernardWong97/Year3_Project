@@ -1,6 +1,6 @@
 ### About
-This repisotory is year 3 groupe project.
-Project Idea is to do smth on Data science field. Exactly what is not yet desided.
+This repository is year 3 group project.
+Project Idea is to do something on Data science field. Exactly what is not yet decided.
 
 ### Project ideas
 Here is few ideas we have/had:
@@ -9,7 +9,7 @@ Here is few ideas we have/had:
 
 Few personal goals:
 - Multilingual project
-- Lern new language:
+- Learn new language:
   - Rust
   - Bash
   - Python
@@ -22,7 +22,7 @@ Rust is staticly typed language.
 - ["This is called destructuring, because it breaks the single tuple into three parts."](https://doc.rust-lang.org/book/ch03-02-data-types.html)
 
 
-### Resourses
+### Resources
 ##### Docker
 - [Learn Enough Docker to be Useful 1.](https://towardsdatascience.com/learn-enough-docker-to-be-useful-b7ba70caeb4b)
 > What is docker.
@@ -33,7 +33,7 @@ Rust is staticly typed language.
 - [Docker Tutorial for Beginners](https://hashnode.com/post/docker-tutorial-for-beginners-cjrj2hg5001s2ufs1nker9he2)
 
 ##### Big Data
-- [Deep learning with Pythn](https://towardsdatascience.com/deep-learning-with-python-703e26853820)
+- [Deep learning with Python](https://towardsdatascience.com/deep-learning-with-python-703e26853820)
 
 ##### BlockChain
 - [Creating Your First Blockchain with Java 1.](https://medium.com/programmers-blockchain/create-simple-blockchain-java-tutorial-from-scratch-6eeed3cb03fa)
