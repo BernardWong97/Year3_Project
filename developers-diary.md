@@ -30,3 +30,4 @@ Need to decide:
 - What kind of data we want to store on BlockChain.
 - Finalize how our git repo should be structured (folder structure)
 - Decide on front-end (do we need it? what kind of info it should display?)
+- We agreed to prove what we learned Rust we need to create small project in Rust.
