@@ -18,7 +18,7 @@ Few personal goals:
 
 ### About Rust
 Rust is staticly typed language.
-- ["The primary situation in which you’d use isize or usize is when indexing some sort of collection."](https://doc.rust-lang.org/book/ch03-02-data-types.html)
+- ["The primary situation in which you’d use `isize` or `usize` is when indexing some sort of collection."](https://doc.rust-lang.org/book/ch03-02-data-types.html)
 - ["This is called destructuring, because it breaks the single tuple into three parts."](https://doc.rust-lang.org/book/ch03-02-data-types.html)
 
 
@@ -42,3 +42,6 @@ Rust is staticly typed language.
 ##### Rust language
 - [The Book](https://doc.rust-lang.org/book/ch01-00-getting-started.html)
 - [Rust Docks](https://doc.rust-lang.org/1.2.0/book/ffi.html)
+- [Rust SHA256 - crates.io](https://crates.io/crates/byte_sha)
+- [Rust String conversions](https://stackoverflow.com/questions/41034635/idiomatic-transformations-for-string-str-vecu8-and-u8)
+- [Bitcoin Hashes Library](https://crates.io/crates/bitcoin_hashes)
