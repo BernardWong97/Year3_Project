@@ -45,3 +45,8 @@ Rust is staticly typed language.
 - [Rust SHA256 - crates.io](https://crates.io/crates/byte_sha)
 - [Rust String conversions](https://stackoverflow.com/questions/41034635/idiomatic-transformations-for-string-str-vecu8-and-u8)
 - [Bitcoin Hashes Library](https://crates.io/crates/bitcoin_hashes)
+- [New in Rust 1.31 / Rust2018](https://blog.rust-lang.org/2018/12/06/Rust-1.31-and-rust-2018.html)
+- [Rust2018](https://rust-lang-nursery.github.io/edition-guide/rust-2018/cargo-and-crates-io/cargo-can-use-a-local-registry-replacement.html)
+- [New in Rust 1.32](https://blog.rust-lang.org/2019/01/17/Rust-1.32.0.html)
+- [Rust from Java](https://github.com/sureshg/java-rust-ffi)
+- [Rust Awesome List](https://github.com/rust-unofficial/awesome-rust#cryptocurrencies)
