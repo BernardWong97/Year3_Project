@@ -38,3 +38,13 @@ We met our mentor. He is happy with our project. We need to make Project Plan by
 Mindaugas:
 - Found out what JetBrains CLion IDE has a good support for Rust language.
 - Did some research for Rust SHA256 library (added to resources).
+
+###### 08-02-2019
+Created a BlockChain (2 of them) by following tutorials.
+
+###### 09-02-2019
+Researching on BlockChain. Preparing main pars for the Block in the BlockChain.
+Did research on Merkle Trees.
+
+###### 09-02-2019
+Learning Rust by solving [challenge](https://www.codewars.com/kata/roboscript-number-1-implement-syntax-highlighting/rust)
