@@ -25,6 +25,13 @@ Rust is staticly typed language.
 
 Parts:
 - Block:
+  - Block Header:
+    - A hash of the previous header
+    - A timestamp
+    - A mining difficulty value
+    - A proof of work nonce
+    - A root hash for the Merkle tree containing the transactions for that block.
+
   - **nonce**:  A 64-bit hash, which proves, combined with the mix-hash, that a sufficient amount of computation has been carried out on this block.
 
   - **timestamp**: A scalar value equal to the reasonable output of Unix time() function at this block inception.
@@ -46,6 +53,8 @@ Parts:
   - **merkle**: A merkle tree, also known as a binary hash tree, is a data structure used for efficiently summarizing and verifying the integrity of large sets of data. - quote Andreas M. Antonopoulos
 
 
+
+
 ### Resources
 ##### Docker
 - [**What is docker** Learn Enough Docker to be Useful 1.](https://towardsdatascience.com/learn-enough-docker-to-be-useful-b7ba70caeb4b)
@@ -62,6 +71,7 @@ Parts:
 - [Blockchain Tutorial – A Beginner’s Guide to Blockchain Technology](https://www.edureka.co/blog/blockchain-tutorial/)
 - [Merkle Trees](https://www.blockchain-council.org/blockchain/what-is-merkel-tree-merkel-root-in-blockchain/)
 - [Blockchain Fundamentals #1: What is a Merkle Tree?](https://medium.com/byzantine-studio/blockchain-fundamentals-what-is-a-merkle-tree-d44c529391d7)
+- [Merkling in Ethereum](https://blog.ethereum.org/2015/11/15/merkling-in-ethereum/)
 
 
 ##### Rust language
