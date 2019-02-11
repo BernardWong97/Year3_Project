@@ -1,0 +1,7 @@
+[package]
+name = "BlockChain"
+version = "0.1.0"
+authors = ["Mindaugas Sarskus <my>", "Bernard Wong <BernardWong97>"]
+edition = "2018"
+
+[dependencies]
