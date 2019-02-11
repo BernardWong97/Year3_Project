@@ -48,3 +48,6 @@ Did research on Merkle Trees.
 
 ###### 09-02-2019
 Learning Rust by solving [challenge](https://www.codewars.com/kata/roboscript-number-1-implement-syntax-highlighting/rust)
+
+###### 11-02-2019
+Updated the project milestone.
