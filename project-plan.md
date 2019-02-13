@@ -33,18 +33,18 @@
         
     Understanding BlockChain.
         - Understand BlockChain from various different resources online.
-        - Do research on BlockChain and it's algorithm.
+        - Do research on BlockChain and its algorithm.
 #### Week 2 ( 11<sup>th</sup> February 2019 - 15<sup>th</sup> February 2019)
-    Start a cargo project.
+    Create the blocks for the BlockChain.
         - Create a cargo project for the program.
         - Create a block structure with a digital signature (SHA-256).
 #### Week 3 ( 18<sup>th</sup> February 2019 - 22<sup>th</sup> February 2019)
     Implement consensus algorithm into the BlockChain.
-        - Consensus algorithm is the fundamental of the BlockChain.
         - There is a lot of consensus algorithm. (e.g. Proof of Work)
         - Decide a consensus algorithm and implement into the project.
 #### Week 4 ( 25<sup>th</sup> February 2019 - 1<sup>st</sup> March 2019)
-    Handling all possible errors in the project.
+     Error Handling
+        - Handling all possible errors in the project.
         - Could not mine blocks when hit iteration limit.
         - The block has no parent block.
 #### Week 5 ( 4<sup>th</sup> March 2019 - 8<sup>th</sup> March 2019)
