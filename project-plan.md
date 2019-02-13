@@ -60,7 +60,7 @@
         - Figure out a way to have multi-threaded peer to peer connection to have distributed BlockChain on every client. (probably p2p crate)
         - Create a network for the BlockChain.
 #### Week 8 ( 25<sup>th</sup> March 2019 - 29<sup>th</sup> March 2019)
-    A User Interface for the BlockChain data access.
+    Deployment of the BlockChain for data access.
         - Docker
         - Xamarin
         - Terminal
