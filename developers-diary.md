@@ -51,3 +51,6 @@ Learning Rust by solving [challenge](https://www.codewars.com/kata/roboscript-nu
 
 ###### 11-02-2019
 Updated the project milestone.
+
+###### 13-02-2019
+Added a project plan for the BlockChain project.
