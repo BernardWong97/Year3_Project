@@ -49,6 +49,12 @@ Did research on Merkle Trees.
 ###### 09-02-2019
 Learning Rust by solving [RoboScript-1](https://www.codewars.com/kata/roboscript-number-1-implement-syntax-highlighting/rust)
 
+###### 11-02-2019
+Updated the project milestone.
+
+###### 13-02-2019
+Added a project plan for the BlockChain project
+
 ###### 14-02-2019
 Learning Rust by solving [RoboScript-2](https://www.codewars.com/kata/roboscript-number-2-implement-the-rs1-specification/train/rust)
 

@@ -1,25 +1,25 @@
 ### About
-This repository is year 3 group project.
-Project Idea is to do something on Data science field. Exactly what is not yet decided.
+This repository is for Year 3 group project.  
+Project Idea is to learn Rust Programming Language while creating a BlockChain program using Rust and possibly build into a Xamarin App or deploy into Docker for data access.
 
 ### Project ideas
-Here is few ideas we have/had:
+Here are a few ideas we have/had:
 - Data mining
-- Blockchain
+- Blockchain &#x2611;
 
 Few personal goals:
 - Multilingual project
-- Learn new language:
-  - Rust
+- Learn a new language:
+  - Rust &#x2611;
   - Bash
   - Python
   - Scala
 - Use Docker (Kubernetes)
 
 ### About Rust
-Rust is staticly typed language.
+Rust is a statically typed language.
 - ["The primary situation in which you’d use `isize` or `usize` is when indexing some sort of collection."](https://doc.rust-lang.org/book/ch03-02-data-types.html)
-- ["This is called destructuring, because it breaks the single tuple into three parts."](https://doc.rust-lang.org/book/ch03-02-data-types.html)
+- ["This is called destructuring because it breaks the single tuple into three parts."](https://doc.rust-lang.org/book/ch03-02-data-types.html)
 
 ### About BlockChain
 
@@ -38,7 +38,7 @@ Parts:
 
   - **mixhash**: A 256-bit hash which proves, combined with the nonce, that a sufficient amount of computation has been carried out on this block.
 
-  - **difficulty**: A scalar value corresponding to the difficulty level applied during the nonce discovering of  block.
+  - **difficulty**: A scalar value corresponding to the difficulty level applied during the nonce discovering of block.
 
   - **alloc**: Allows defining a list of pre-filled wallets. It’s an Ethereum specific functionality to handle the “Ether pre-sale” period.
 
@@ -86,3 +86,4 @@ Parts:
 - [Use Rust from Java](https://github.com/sureshg/java-rust-ffi)
 - [Rust Awesome List](https://github.com/rust-unofficial/awesome-rust#cryptocurrencies)
 - [Regex in Rust](https://docs.rs/regex/1.1.0/regex/)
+- [Rust Youtube Tutorial Playlist](https://www.youtube.com/playlist?list=PLJbE2Yu2zumDF6BX6_RdPisRVHgzV02NW)
