@@ -47,4 +47,10 @@ Researching on BlockChain. Preparing main pars for the Block in the BlockChain.
 Did research on Merkle Trees.
 
 ###### 09-02-2019
-Learning Rust by solving [challenge](https://www.codewars.com/kata/roboscript-number-1-implement-syntax-highlighting/rust)
+Learning Rust by solving [RoboScript-1](https://www.codewars.com/kata/roboscript-number-1-implement-syntax-highlighting/rust)
+
+###### 14-02-2019
+Learning Rust by solving [RoboScript-2](https://www.codewars.com/kata/roboscript-number-2-implement-the-rs1-specification/train/rust)
+
+###### 15-02-201
+Asked question on [Stack Overflow](https://stackoverflow.com/questions/54697274/how-to-update-all-the-values-in-a-btreeset?noredirect=1#comment96183233_54697274)

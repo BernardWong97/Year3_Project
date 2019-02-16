@@ -85,3 +85,4 @@ Parts:
 - [New in Rust 1.32](https://blog.rust-lang.org/2019/01/17/Rust-1.32.0.html)
 - [Use Rust from Java](https://github.com/sureshg/java-rust-ffi)
 - [Rust Awesome List](https://github.com/rust-unofficial/awesome-rust#cryptocurrencies)
+- [Regex in Rust](https://docs.rs/regex/1.1.0/regex/)
