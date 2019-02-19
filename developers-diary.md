@@ -58,5 +58,8 @@ Added a project plan for the BlockChain project
 ###### 14-02-2019
 Learning Rust by solving [RoboScript-2](https://www.codewars.com/kata/roboscript-number-2-implement-the-rs1-specification/train/rust)
 
-###### 15-02-201
+###### 15-02-2019
 Asked question on [Stack Overflow](https://stackoverflow.com/questions/54697274/how-to-update-all-the-values-in-a-btreeset?noredirect=1#comment96183233_54697274)
+
+###### 18-02-2019
+Started Block implementation. 
