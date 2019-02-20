@@ -72,6 +72,7 @@ Parts:
 - [Merkle Trees](https://www.blockchain-council.org/blockchain/what-is-merkel-tree-merkel-root-in-blockchain/)
 - [Blockchain Fundamentals #1: What is a Merkle Tree?](https://medium.com/byzantine-studio/blockchain-fundamentals-what-is-a-merkle-tree-d44c529391d7)
 - [Merkling in Ethereum](https://blog.ethereum.org/2015/11/15/merkling-in-ethereum/)
+- [Blockchain in Python](https://hackernoon.com/learn-blockchains-by-building-one-117428612f46). Uses HTTP.
 
 
 ##### Rust language
