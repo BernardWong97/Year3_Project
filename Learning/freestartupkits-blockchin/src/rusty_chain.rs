@@ -98,6 +98,7 @@ impl Block {
         for nonce in 0..MAX_NONCE {
             let hash = Self::calculate_hash(&self, nonce);
             let hash_int = BigUint::from_bytes_be(&hash);
+
             if hash_int < target {
                 return Some(nonce);
             }
@@ -139,6 +140,13 @@ impl Block {
             (val >> 56) as u8,
         ]
     }
+
+    pub fn formatted_data(&self) -> String {
+        let data_str = &self.data;
+        let data_str = String::from_utf8(data_str.to_vec()).unwrap();
+
+        data_str
+    }
 }
 
 
@@ -179,10 +187,11 @@ impl BlockChain {
             println!("block: {}", i);
             println!("hash: {:?}", block.nonce);
             println!("parent: {:?}", block.prev_block_hash);
-            println!("data: {:?}", block.data);
+            println!("data: {:?}", block.formatted_data());
             println!()
         }
     }
+
 }
 
 

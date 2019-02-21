@@ -29,6 +29,12 @@ fn run() -> Result<(), MiningError> {
     println!("Send 1 RC to foo");
     chain.add_block("cool block bro!")?;
 
+    println!("Send another RC to foo");
+    chain.add_block("Testing another new block!")?;
+
+    println!("Send another RC to foo");
+    chain.add_block("Testing!")?;
+
     println!("Traversing blockchain:\n");
     chain.traverse();
 
