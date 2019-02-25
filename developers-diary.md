@@ -64,6 +64,12 @@ Asked question on [Stack Overflow](https://stackoverflow.com/questions/54697274/
 ###### 18-02-2019
 Started Block implementation.
 
+###### 23-02-2019
+Implemanted blockchain.
+Serialization works, Sha256 hashing works.
+Testing suported development
+Rough(all in single file), needs to be refactored.
+
 ##### 25-02-2019
 Research on peer to peer BlockChain network.  
 Referencing Go programming language [tutorial](https://medium.com/@mycoralhealth/code-a-simple-p2p-blockchain-in-go-46662601f417).  
