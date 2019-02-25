@@ -73,7 +73,7 @@ Parts:
 - [Blockchain Fundamentals #1: What is a Merkle Tree?](https://medium.com/byzantine-studio/blockchain-fundamentals-what-is-a-merkle-tree-d44c529391d7)
 - [Merkling in Ethereum](https://blog.ethereum.org/2015/11/15/merkling-in-ethereum/)
 - [Blockchain in Python](https://hackernoon.com/learn-blockchains-by-building-one-117428612f46). Uses HTTP.
-
+- [Blockchain network in GO](https://medium.com/@mycoralhealth/code-a-simple-p2p-blockchain-in-go-46662601f417)
 
 ##### Rust language
 - [The Book](https://doc.rust-lang.org/book/ch01-00-getting-started.html)
