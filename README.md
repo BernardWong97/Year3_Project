@@ -88,3 +88,4 @@ Parts:
 - [Rust Awesome List](https://github.com/rust-unofficial/awesome-rust#cryptocurrencies)
 - [Regex in Rust](https://docs.rs/regex/1.1.0/regex/)
 - [Rust Youtube Tutorial Playlist](https://www.youtube.com/playlist?list=PLJbE2Yu2zumDF6BX6_RdPisRVHgzV02NW)
+- [Rust Chat Application](https://steemit.com/technology/@tensor/rust-project-native-chat-app)

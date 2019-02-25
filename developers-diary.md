@@ -62,4 +62,9 @@ Learning Rust by solving [RoboScript-2](https://www.codewars.com/kata/roboscript
 Asked question on [Stack Overflow](https://stackoverflow.com/questions/54697274/how-to-update-all-the-values-in-a-btreeset?noredirect=1#comment96183233_54697274)
 
 ###### 18-02-2019
-Started Block implementation. 
+Started Block implementation.
+
+##### 25-02-2019
+Research on peer to peer BlockChain network.  
+Referencing Go programming language [tutorial](https://medium.com/@mycoralhealth/code-a-simple-p2p-blockchain-in-go-46662601f417).  
+Create a branch focusing on developing and learning peer2peer application.
