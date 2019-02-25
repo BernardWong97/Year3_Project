@@ -68,9 +68,6 @@ Started Block implementation.
 Implemented blockchain.
 Serialization works, Sha256 hashing works.
 Testing supported development
-Implemanted blockchain.
-Serialization works, Sha256 hashing works.
-Testing suported development
 
 ##### 25-02-2019
 Research on peer to peer BlockChain network.  
