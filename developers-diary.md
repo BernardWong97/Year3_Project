@@ -74,3 +74,27 @@ Research on peer to peer BlockChain network.
 Referencing Go programming language [tutorial](https://medium.com/@mycoralhealth/code-a-simple-p2p-blockchain-in-go-46662601f417).  
 Develop an server/client application by referencing this [tutorial](https://steemit.com/technology/@tensor/rust-project-native-chat-app).  
 Create a branch focusing on developing and learning peer2peer application.
+
+##### 26-02-2019
+We had a meeting. During the meeting we decided to allow our BlockChain to be used for sending messages.
+We planed next week tasks:
+- refactor existing blockchain implementation (brake source code it in to files)
+- to build basic node for our p2p network.
+
+##### 27-02-2019
+Researched on [Rust Work-spaces](https://doc.rust-lang.org/1.30.0/book/second-edition/ch14-03-cargo-workspaces.html). It will be needed to help manage project.</br>
+Did some research on available Rust crypto crates:
+- [rust-crypto](https://crates.io/crates/rust-crypto) - loads of cryptos, but last time updated 3 years ago.
+- [ring](https://crates.io/crates/ring) - recomended by a person from an IRC chat.
+- [bcrypt](https://crates.io/crates/bcrypt)
+
+</br>
+***Found a very nice blog with a loads of examples, crate uses, explanations and many more.
+[24 days of Rust](https://siciarz.net/24-days-rust-rayon/)*** It has even a [book](http://zsiciarz.github.io/24daysofrust/book/vol1/index.html).
+
+##### 01-03-2019
+Refactored blockchan implementation:
+- spited into files
+- removed `struct BlockLoad`
+- added `struct Message`
+- gegericlized code (add more generics)

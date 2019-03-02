@@ -77,6 +77,7 @@ Parts:
 
 ##### Rust language
 - [The Book](https://doc.rust-lang.org/book/ch01-00-getting-started.html)
+- [24 days of Rust](http://zsiciarz.github.io/24daysofrust/book/vol1/index.html)
 - [Rust Docks](https://doc.rust-lang.org/1.2.0/book/ffi.html)
 - [Rust SHA256 - crates.io](https://crates.io/crates/byte_sha)
 - [Rust String conversions](https://stackoverflow.com/questions/41034635/idiomatic-transformations-for-string-str-vecu8-and-u8)
