@@ -11,37 +11,39 @@ use crate::hashable::clone_into_array;
 //////////////////////////////// Transaction ///////////////////////////
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
-pub struct Transaction <D> {
+pub struct Transaction <D, V> {
     sender: String,
     receiver: String,
-    amount: usize,  // TODO: change it to transaction fee
+    value: V,
     load: D,
 }
 
 #[allow(dead_code)]
-impl <D>Transaction<D>
+impl <D, V>Transaction<D, V>
     where
-        D: Hashable
+        D: Hashable,
+        V: Hashable,
 {
-    pub fn set_sender(&mut self, sender:String) -> &mut Self {
+
+    pub fn add_sender(&mut self, sender:String) -> &mut Self {
         self.sender = sender;
 
         self
     }
 
-    pub fn set_receiver(&mut self, receiver:String) -> &mut Self {
+    pub fn add_receiver(&mut self, receiver:String) -> &mut Self {
         self.receiver = receiver;
 
         self
     }
 
-    pub fn set_amount(&mut self, amount:usize) -> &mut Self {
-        self.amount = amount;
+    pub fn add_value(&mut self, value:V) -> &mut Self {
+        self.value = value;
 
         self
     }
 
-    pub fn set_load(&mut self, load:D) -> &mut Self {
+    pub fn add_load(&mut self, load:D) -> &mut Self {
         self.load = load;
 
         self
@@ -49,29 +51,31 @@ impl <D>Transaction<D>
 
 }
 
-impl <D>Default for Transaction<D>
+impl <D, V>Default for Transaction<D, V>
     where
-        D: Default
+        D: Default,
+        V: Default,
 {
     fn default() -> Self {
         Self {
             sender: String::new(),
             receiver: String::new(),
-            amount: 0usize,
+            value: V::default(),
             load: D::default(),
         }
     }
 }
 
-impl <D>Hashable for Transaction <D>
+impl <D, V>Hashable for Transaction <D, V>
     where
-        D: Hashable
+        D: Hashable,
+        V: Hashable,
 {
     fn hash(&self) -> HashSha256 {
         let mut hasher = Sha256::new();
         hasher.input(self.sender.as_str());
         hasher.input(self.receiver.as_str());
-        hasher.input(convert_u64_to_u8_array(self.amount as u64));
+        hasher.input(self.value.hash());
         hasher.input(self.load.hash());
 
         clone_into_array(hasher.result().as_slice())

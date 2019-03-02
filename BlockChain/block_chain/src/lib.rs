@@ -15,28 +15,36 @@ pub mod transaction;
 pub mod message;
 
 
-use serde::{Serialize, Deserialize};
-use sha2::{Sha256, Sha512, Digest};
 use std::mem;
 use std::convert::AsMut;
+use serde::{Serialize, Deserialize, Serializer};
+use sha2::{Sha256, Sha512, Digest};
 use uuid::Uuid;
 
 use crate::transaction::Transaction;
 use crate::block::Block;
+use crate::hashable::Hashable;
+use crate::hashable::clone_into_array;
+use crate::hashable::HashSha256;
+use crate::hashable::convert_u64_to_u8_array;
 
 
 //////////////////////////////// Block Chain ////////////////////////////
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct BlockChain {
-    chain: Vec<Block>,
+pub struct BlockChain<T>
+{
     uuid:Uuid,
+    chain: Vec<Block<T>>,
     //    chain: BTreeSet<Block>,     // ordered set, blocks should be unique anyway
-    transactions: Vec<Transaction<String>>, // pending transactions
+    transactions: Vec<T>, // pending transactions
 }
 
 #[allow(dead_code)]
-impl BlockChain {
+impl <T>BlockChain<T>
+    where
+        T: Hashable + Default,
+{
     // TODO: Implement merkle tree functionality fo transaction confirmation.
     ///
     /// Creates new blockchain with genesis block in it
@@ -57,8 +65,8 @@ impl BlockChain {
     /// New block will have all pending transactions.
     /// TODO: rewrite it
     ///
-    pub fn create_next_block(&mut self) -> &Block {
-        let mut block = self.chain.last()
+    pub fn create_next_block(&mut self) -> &Block<T> {
+        let mut new_block = self.chain.last()
             .unwrap_or_else(|| {
                 panic!("Here is no blocks in blockchain");
             }).next();  // create new "next" block
@@ -70,14 +78,14 @@ impl BlockChain {
         // second part(close to end)
         mem::replace(&mut self.transactions, Vec::new())
             .into_iter()
-            .for_each(|tr|{block.add_transaction(tr);});
+            .for_each(|tr|{new_block.add_record(tr);});
 
         assert_eq!(self.transactions.len(), 0);
 
 
 
         // add new block to blockchain
-        self.chain.push(block);
+        self.chain.push(new_block);
 
         // return blockchain last block reference
         &self.chain.last().unwrap_or_else(||
@@ -88,12 +96,31 @@ impl BlockChain {
     ///
     /// Add transaction to pending transactions
     ///
-    pub fn add_transaction(&mut self, transaction:Transaction<String>) -> &mut Self {
+    pub fn add_transaction(&mut self, transaction:T) -> &mut Self {
         self.transactions.push(transaction);
 
         self
     }
 }
+
+impl Hashable for String {
+    fn hash(&self) -> HashSha256 {
+        let mut hasher = Sha256::new();
+        hasher.input(self.as_bytes());
+
+        clone_into_array(hasher.result().as_slice())
+    }
+}
+
+impl Hashable for usize {
+    fn hash(&self) -> HashSha256 {
+        let mut hasher = Sha256::new();
+        hasher.input(convert_u64_to_u8_array(*self as u64));
+
+        clone_into_array(hasher.result().as_slice())
+    }
+}
+
 
 
 //////////////////////////////// Tests /////////////////////////////////////////////////
@@ -103,35 +130,35 @@ fn test_blockchain_serde(){
     let mut blockchain = BlockChain::new(); // block #0 (genesis)
 
     // crating block #1
-    let mut transaction:Transaction<String> = Transaction::default();
-    transaction.set_sender(String::from("s1"))
-        .set_receiver(String::from("r1"))
-        .set_amount(1usize)
-        .set_load(String::from("load 1"));
+    let mut transaction:Transaction<String, usize> = Transaction::default();
+    transaction.add_sender(String::from("s1"))
+        .add_receiver(String::from("r1"))
+        .add_value(1usize)
+        .add_load(String::from("load 1"));
     blockchain.add_transaction(transaction);
 
-    let mut transaction:Transaction<String> = Transaction::default();   // shadowing variable
-    transaction.set_sender(String::from("s2"))
-        .set_receiver(String::from("r2"))
-        .set_amount(2usize)
-        .set_load(String::from("load 2"));
+    let mut transaction:Transaction<String, usize> = Transaction::default();   // shadowing variable
+    transaction.add_sender(String::from("s2"))
+        .add_receiver(String::from("r2"))
+        .add_value(2usize)
+        .add_load(String::from("load 2"));
     blockchain.add_transaction(transaction);
 
     blockchain.create_next_block();
 
     // creating block #2
-    let mut transaction:Transaction<String> = Transaction::default();
-    transaction.set_sender(String::from("s11"))
-        .set_receiver(String::from("r11"))
-        .set_amount(11usize)
-        .set_load(String::from("load 11"));
+    let mut transaction:Transaction<String, usize> = Transaction::default();
+    transaction.add_sender(String::from("s11"))
+        .add_receiver(String::from("r11"))
+        .add_value(11usize)
+        .add_load(String::from("load 11"));
     blockchain.add_transaction(transaction);
 
-    let mut transaction:Transaction<String> = Transaction::default();   // shadowing variable
-    transaction.set_sender(String::from("s12"))
-        .set_receiver(String::from("r12"))
-        .set_amount(12usize)
-        .set_load(String::from("load 12"));
+    let mut transaction:Transaction<String, usize> = Transaction::default();   // shadowing variable
+    transaction.add_sender(String::from("s12"))
+        .add_receiver(String::from("r12"))
+        .add_value(12usize)
+        .add_load(String::from("load 12"));
     blockchain.add_transaction(transaction);
 
     blockchain.create_next_block();
@@ -143,7 +170,7 @@ fn test_blockchain_serde(){
     println!("serialized = {}", serialized);
 
     // Convert the JSON string back to a Block.
-    let deserialized: BlockChain = serde_json::from_str(&serialized).unwrap();
+    let deserialized: BlockChain<Transaction<String, usize>> = serde_json::from_str(&serialized).unwrap();
     println!("deserialized = {:?}", deserialized);
 
     assert_eq!(deserialized.chain.len(), blockchain.chain.len());
@@ -152,7 +179,7 @@ fn test_blockchain_serde(){
 
     println!("{:?}", blockchain);
 
-//    assert!(false);
+    assert!(false);
 }
 
 
