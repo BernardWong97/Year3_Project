@@ -19,6 +19,7 @@ use serde::{Serialize, Deserialize};
 use sha2::{Sha256, Sha512, Digest};
 use std::mem;
 use std::convert::AsMut;
+use uuid::Uuid;
 
 use crate::transaction::Transaction;
 use crate::block::Block;
@@ -28,8 +29,8 @@ use crate::block::Block;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct BlockChain {
-    //    uuid:         // TODO: Create unique ID to identify blockchain. (...? use hashed current time??)
     chain: Vec<Block>,
+    uuid:Uuid,
     //    chain: BTreeSet<Block>,     // ordered set, blocks should be unique anyway
     transactions: Vec<Transaction<String>>, // pending transactions
 }
@@ -45,6 +46,7 @@ impl BlockChain {
         chain.push(Block::genesis());        // add genesis block to chain
 
         Self{
+            uuid: Uuid::new_v4(),
             chain,
             transactions: Vec::new(),
         }
