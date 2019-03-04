@@ -1,5 +1,5 @@
 [package]
-name = "server"
+name = "node"
 version = "0.1.0"
 authors = ["BernardWong97 <ben.wc88@gmail.com>"]
 edition = "2018"
