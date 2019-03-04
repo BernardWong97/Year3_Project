@@ -1,0 +1,17 @@
+[package]
+name = "multiple_binaries"
+version = "0.1.0"
+authors = ["BernardWong97 <ben.wc88@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+
+
+[[bin]]
+name = "binary_one"
+path = "src/binary_one/bin/main.rs"
+
+[[bin]]
+name = "binary_two"
+path = "src/binary_two/bin/main.rs"
+
