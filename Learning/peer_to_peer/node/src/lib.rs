@@ -8,7 +8,7 @@ pub mod connector {
     const MSG_SIZE: usize = 32;
 
     pub fn connect(){
-        let mut client = TcpStream::connect("127.0.0.1:6000").expect("Stream failed to connect.");
+        let mut client = TcpStream::connect("80.233.35.115:6000").expect("Stream failed to connect.");
         client.set_nonblocking(true).expect("Failed to initialize non-blocking.");
 
         let (sender, receiver) = mpsc::channel::<String>();
