@@ -1,25 +1,22 @@
+use bcrypt::{hash, verify, DEFAULT_COST};
+use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256, Sha512};
 
-use serde::{Serialize, Deserialize};
-use sha2::{Sha256, Sha512, Digest};
-use bcrypt::{DEFAULT_COST, hash, verify};
-
-
-use crate::hashable::Hashable;
-use crate::hashable::HashSha256;
 use crate::hashable::clone_into_array;
-
+use crate::hashable::HashSha256;
+use crate::hashable::Hashable;
 
 //////////////////////////////// Message ///////////////////////////
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
-pub struct Message{
+pub struct Message {
     sender: String,
     receiver: String,
     text: String,
 }
 
 impl Message {
-    pub fn new(sender:&str, receiver:&str, text:&str) -> Self {
+    pub fn new(sender: &str, receiver: &str, text: &str) -> Self {
         Self {
             sender: sender.to_string(),
             receiver: receiver.to_string(),
@@ -39,11 +36,10 @@ impl Hashable for Message {
     }
 }
 
-
 //////////////////////////////// Tests /////////////////////////////////////////////////
 
 #[test]
-fn test_message_serde(){
+fn test_message_serde() {
     let message = Message::new("mindaugas", "bernard", "how are you?");
 
     // Convert the Point to a JSON string.
@@ -56,11 +52,11 @@ fn test_message_serde(){
 
     assert_eq!(deserialized, message);
 
-//    assert!(false);
+    //    assert!(false);
 }
 
 #[test]
-fn test_message_bcrypt(){
+fn test_message_bcrypt() {
     let message = Message::new("mindaugas", "bernard", "how are you?");
 
     let hashed = hash(&message.text, 10);
@@ -79,7 +75,7 @@ fn test_message_bcrypt(){
 }
 
 #[test]
-fn test_message_cyper(){
+fn test_message_cypher() {
     // https://siciarz.net/24-days-of-rust-rust-crypto/
     let message = Message::new("mindaugas", "bernard", "how are you?");
 

@@ -1,15 +1,10 @@
-
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256, Sha512};
 use std::time::{SystemTime, UNIX_EPOCH};
-use sha2::{Sha256, Sha512, Digest};
 
 use crate::hashable::{
-    HashSha256, Hashable,
-    convert_u64_to_u8_array,
-    convert_u32_to_u8_array,
-    clone_into_array,
+    clone_into_array, convert_u32_to_u8_array, convert_u64_to_u8_array, HashSha256, Hashable,
 };
-
 
 ////////////////////////////// Block Header ////////////////////////////
 
@@ -22,9 +17,9 @@ pub struct BlockHeader {
     time_stamp: u64,
     difficulty: usize,
     nonce: usize,
-// https://sitano.github.io/merkle_light/merkle_light/index.html#modules
-//    merkle: BlockHash,    TODO: do it later if we have time for it
-//    blockchain_uuid:
+    // https://sitano.github.io/merkle_light/merkle_light/index.html#modules
+    //    merkle: BlockHash,    TODO: do it later if we have time for it
+    //    blockchain_uuid:
 }
 
 //#[allow(non_snake_case)]
@@ -37,7 +32,10 @@ impl BlockHeader {
         Self {
             index: 0u32,
             prev_hash: HashSha256::default(),
-            time_stamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs(),
+            time_stamp: SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap_or_default()
+                .as_secs(),
             difficulty: 0usize,
             nonce: 0usize,
         }
@@ -53,9 +51,12 @@ impl BlockHeader {
     ///
     pub fn next(&self) -> Self {
         Self {
-            index: self.index +1,
+            index: self.index + 1,
             prev_hash: self.hash(),
-            time_stamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs(),
+            time_stamp: SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap_or_default()
+                .as_secs(),
             ..self.clone()
         }
     }
@@ -63,7 +64,7 @@ impl BlockHeader {
     ///
     /// Sets block difficulty to a given one.
     ///
-    pub fn set_difficulty(&mut self, difficulty:usize) -> &mut Self {
+    pub fn set_difficulty(&mut self, difficulty: usize) -> &mut Self {
         self.difficulty = difficulty;
 
         self
@@ -72,7 +73,7 @@ impl BlockHeader {
     ///
     /// Sets block nonce to a given one.
     ///
-    pub fn set_nonce(&mut self, nonce:usize) -> &mut Self {
+    pub fn set_nonce(&mut self, nonce: usize) -> &mut Self {
         self.nonce = nonce;
 
         self
@@ -86,7 +87,6 @@ impl BlockHeader {
 
         self
     }
-
 }
 
 impl Hashable for BlockHeader {
@@ -102,11 +102,10 @@ impl Hashable for BlockHeader {
     }
 }
 
-
 //////////////////////////////// Tests /////////////////////////////////////////////////
 
 #[test]
-fn test_block_header_serde(){
+fn test_block_header_serde() {
     let header = BlockHeader::first();
 
     // Convert the Point to a JSON string.
@@ -121,15 +120,13 @@ fn test_block_header_serde(){
     assert_eq!(deserialized.prev_hash, header.prev_hash);
     assert_eq!(deserialized.time_stamp, header.time_stamp);
 
-//    assert!(false);
+    //    assert!(false);
 }
 
 #[test]
-fn test_block_header_mutators(){
+fn test_block_header_mutators() {
     let mut header = BlockHeader::first();
-    header.set_difficulty(5usize)
-        .set_nonce(5)
-        .increase_nonce();
+    header.set_difficulty(5usize).set_nonce(5).increase_nonce();
 
     println!("{:?}", header);
 
@@ -138,22 +135,21 @@ fn test_block_header_mutators(){
     assert_eq!(header.difficulty, 5);
     assert_eq!(header.prev_hash, [0; 32]);
 
-//    assert!(false);
+    //    assert!(false);
 }
 
 #[test]
-fn test_block_header_hash(){
+fn test_block_header_hash() {
     let mut header = BlockHeader::first();
     println!("{:?}", header);
 
-    let hash:HashSha256 = header.hash();
+    let hash: HashSha256 = header.hash();
     header.increase_nonce();
-    let hash1:HashSha256 = header.hash();
+    let hash1: HashSha256 = header.hash();
     println!("{:?}", hash);
     println!("{:?}", header);
 
     assert_ne!(hash, hash1);
-
 
     let header1 = header.next();
     let header2 = header1.next();
@@ -164,5 +160,5 @@ fn test_block_header_hash(){
 
     assert_ne!(header1.hash(), header2.hash());
 
-//    assert!(false);
+    //    assert!(false);
 }

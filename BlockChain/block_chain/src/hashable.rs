@@ -1,11 +1,8 @@
-
-
 ////////////////////////////// Hash type ////////////////////////////
 
 const HASH_BYTE_SIZE: usize = 32;
 
 pub type HashSha256 = [u8; HASH_BYTE_SIZE];
-
 
 ////////////////////////////// Hashable trait ////////////////////////////
 
@@ -19,9 +16,9 @@ pub trait Hashable {
 ///  <br>[code reference](https://stackoverflow.com/a/37679019/5322506)
 ///
 pub fn clone_into_array<A, T>(slice: &[T]) -> A
-    where
-        A: Default + AsMut<[T]>,
-        T: Clone,
+where
+    A: Default + AsMut<[T]>,
+    T: Clone,
 {
     let mut a = Default::default();
     <A as AsMut<[T]>>::as_mut(&mut a).clone_from_slice(slice);
@@ -38,7 +35,7 @@ pub fn convert_u32_to_u8_array(val: u32) -> [u8; 4] {
         (val >> 8 * 1) as u8,
         (val >> 8 * 2) as u8,
         (val >> 8 * 3) as u8,
-    ]
+    ];
 }
 
 ///
@@ -55,7 +52,7 @@ pub fn convert_u64_to_u8_array(val: u64) -> [u8; 8] {
         (val >> 8 * 5) as u8,
         (val >> 8 * 6) as u8,
         (val >> 8 * 7) as u8,
-    ]
+    ];
 }
 
 //////////////////////////////// Tests /////////////////////////////////////////////////
