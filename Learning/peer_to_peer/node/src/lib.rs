@@ -8,54 +8,60 @@ pub mod connector {
     const MSG_SIZE: usize = 32;
 
     pub fn connect(ip_address: &str){
+        println!("Trying to connect {}...", ip_address);
         let ip_port = format!("{}:{}", ip_address, "6000");
-        let mut client = TcpStream::connect(ip_port).expect("Stream failed to connect.");
-        client.set_nonblocking(true).expect("Failed to initialize non-blocking.");
 
-        let (sender, receiver) = mpsc::channel::<String>();
+        if let Ok(mut client) = TcpStream::connect(ip_port) {
+            client.set_nonblocking(true).expect("Failed to initialize non-blocking.");
 
-        thread::spawn(move || loop{
-            let mut buffer = vec![0; MSG_SIZE];
+            let (sender, receiver) = mpsc::channel::<String>();
 
-            match client.read_exact(&mut buffer) {
-                Ok(_) => {
-                    let msg = buffer.into_iter().take_while(|&x| x != 0).collect::<Vec<_>>();
+            thread::spawn(move || loop{
+                let mut buffer = vec![0; MSG_SIZE];
 
-                    println!("Message receive: {:?}", msg);
-                },
-                Err(ref err) if err.kind() ==  ErrorKind::WouldBlock => (), // if ErrorKind is WouldBlock, just continue
-                Err(_) => {
-                    println!("Connection with server was terminated.");
-                    break;
-                } // OK, Err
-            } // match
+                match client.read_exact(&mut buffer) {
+                    Ok(_) => {
+                        let msg = buffer.into_iter().take_while(|&x| x != 0).collect::<Vec<_>>();
 
-            match receiver.try_recv(){
-                Ok(msg) => {
-                    let mut buffer = msg.clone().into_bytes(); // convert messages into bytes
-                    buffer.resize(MSG_SIZE, 0);
+                        println!("Message receive: {:?}", msg);
+                    },
+                    Err(ref err) if err.kind() ==  ErrorKind::WouldBlock => (), // if ErrorKind is WouldBlock, just continue
+                    Err(_) => {
+                        println!("Connection with {} was terminated.", ip_address);
+                        break;
+                    } // OK, Err
+                } // match
 
-                    client.write_all(&buffer).expect("Failed to write to socket.");
-                    println!("Message sent: {:?}", msg);
-                },
-                Err(TryRecvError::Empty) => (),
-                Err(TryRecvError::Disconnected) => break
-            } // match
+                match receiver.try_recv(){
+                    Ok(msg) => {
+                        let mut buffer = msg.clone().into_bytes(); // convert messages into bytes
+                        buffer.resize(MSG_SIZE, 0);
 
-            thread::sleep(Duration::from_millis(100));
-        });
+                        client.write_all(&buffer).expect("Failed to write to socket.");
+                        println!("Message sent: {:?}", msg);
+                    },
+                    Err(TryRecvError::Empty) => (),
+                    Err(TryRecvError::Disconnected) => break
+                } // match
 
-        println!("Write a message: ");
+                thread::sleep(Duration::from_millis(100));
+            });
 
-        loop {
-            let mut buffer = String::new();
-            io::stdin().read_line(&mut buffer).expect("Failed to read from stdin.");
-            let msg = buffer.trim().to_string();
+            println!("Write a message: ");
 
-            if msg == ":quit" || sender.send(msg).is_err() {break}
-        } // loop
+            loop {
+                let mut buffer = String::new();
+                io::stdin().read_line(&mut buffer).expect("Failed to read from stdin.");
+                let msg = buffer.trim().to_string();
 
-        println!("Bye!");
+                if msg == ":quit" || sender.send(msg).is_err() {break}
+            } // loop
+
+            println!("Bye!");
+        } else {
+            println!("Failed to connect {}.", ip_address);
+        }; // if connected
+
     } // connect()
 } // connector
 
@@ -70,7 +76,7 @@ pub mod server {
     pub fn ini_server() {
         let server = TcpListener::bind("0.0.0.0:6000").expect("Listener failed to bind.");
         server.set_nonblocking(true).expect("Failed to initialize non-blocking.");
-        println!("Server running.");
+        println!("Server running...");
 
         let mut clients = vec![];
         let (sender, receiver) = mpsc::channel::<String>();

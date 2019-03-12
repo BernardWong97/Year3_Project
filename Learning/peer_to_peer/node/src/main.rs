@@ -1,5 +1,6 @@
 // use std::io;
 use std::thread;
+use std::time::Duration;
 use node::connector::connect;
 use node::server::ini_server;
 
@@ -17,6 +18,7 @@ fn main() {
         match i {
             &IP_ADDRESS=> continue,
             _ => children.push(thread::spawn(move || {
+                thread::sleep(Duration::from_millis(100));
                 connect(i);
             })),
         } // match
