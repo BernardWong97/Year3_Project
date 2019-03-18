@@ -69,7 +69,7 @@ where
     pub fn create_next_block(&mut self) -> &Block<T> {
         let mut new_block = self
             .chain
-            .last()
+            .last()     // TODO: check if element is removed from DB
             .unwrap_or_else(|| {
                 panic!("Here is no blocks in blockchain");
             })
