@@ -99,6 +99,13 @@ Refactored blockchan implementation:
 - added `struct Message`
 - gegericlized code (add more generics)
 
+##### 04-03-2019
+Asked a question on [StackOverflow](https://stackoverflow.com/questions/54992166/in-rust-cargo-can-i-run-two-main-in-a-single-execution).
+Research on spawning processes for background process execution. [Link](https://doc.rust-lang.org/std/process/index.html)
+Came out ideas for peer to peer network:
+- build TCP listener and connector libraries and modules.
+- different cargo execution instance/process for listener and connector.
+
 ##### 08-03-2019
 I was busy by "removing obtacles" from projects way, doind othe assignments.
 
