@@ -114,3 +114,4 @@ Whached few videos about Rust. [Is It Time to Rewrite the Operating System in Ru
 
 ##### 18-03-2019
 Did some code clean-up.
+Merged learning and blockchain branches to master.
