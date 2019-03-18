@@ -98,3 +98,12 @@ Refactored blockchan implementation:
 - removed `struct BlockLoad`
 - added `struct Message`
 - gegericlized code (add more generics)
+
+##### 08-03-2019
+I was busy by "removing obtacles" from projects way, doind othe assignments.
+
+##### 15-03-2019
+Whached few videos about Rust. [Is It Time to Rewrite the Operating System in Rust?](https://youtu.be/HgtRAbE1nBM) was very nice.
+
+##### 18-03-2019
+Did some code clean-up.

@@ -90,3 +90,5 @@ Parts:
 - [Regex in Rust](https://docs.rs/regex/1.1.0/regex/)
 - [Rust Youtube Tutorial Playlist](https://www.youtube.com/playlist?list=PLJbE2Yu2zumDF6BX6_RdPisRVHgzV02NW)
 - [Rust Chat Application](https://steemit.com/technology/@tensor/rust-project-native-chat-app)
+- [Nice talk about OS's and what value Rust can add to them](https://www.youtube.com/watch?v=HgtRAbE1nBM)
+- [Talk about rus from Rocket crate developer](https://www.youtube.com/watch?v=cDFSrVhnZKo)
