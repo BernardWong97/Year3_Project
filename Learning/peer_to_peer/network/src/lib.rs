@@ -1,3 +1,7 @@
+//! # Network Crate
+//!
+//! 'network' crate is a utility crate use to connect to
+//! other nodes to send/receive data.
 
 pub mod connector {
     use std::io::{self, ErrorKind, Read, Write};
@@ -8,7 +12,7 @@ pub mod connector {
 
     const MSG_SIZE: usize = 32;
 
-
+    /// Connect to a node's port 6000 TCP listener using TCP stream.
     pub fn connect(ip_address: &'static str){
         println!("Trying to connect {}...", ip_address);
         let ip_port = format!("{}:{}", ip_address, "6000"); // combine ip address and port
@@ -67,7 +71,7 @@ pub mod connector {
     } // connect()
 } // connector
 
-
+/// TCP listener server listen any incoming connection from port 6000.
 pub mod listener {
     use std::io::{ErrorKind, Read, Write};
     use std::net::TcpListener;
