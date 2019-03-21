@@ -93,25 +93,46 @@ Did some research on available Rust crypto crates:
 [24 days of Rust](https://siciarz.net/24-days-rust-rayon/)*** It has even a [book](http://zsiciarz.github.io/24daysofrust/book/vol1/index.html).
 
 ##### 01-03-2019
-Refactored blockchan implementation:
+Refactored blockchain implementation:
 - spited into files
 - removed `struct BlockLoad`
 - added `struct Message`
 - gegericlized code (add more generics)
 
 ##### 04-03-2019
-Asked a question on [StackOverflow](https://stackoverflow.com/questions/54992166/in-rust-cargo-can-i-run-two-main-in-a-single-execution).
+Asked a question on [StackOverflow](https://stackoverflow.com/questions/54992166/in-rust-cargo-can-i-run-two-main-in-a-single-execution).  
 Research on spawning processes for background process execution. [Link](https://doc.rust-lang.org/std/process/index.html)
 Came out ideas for peer to peer network:
 - build TCP listener and connector libraries and modules.
 - different cargo execution instance/process for listener and connector.
 
 ##### 08-03-2019
-I was busy by "removing obtacles" from projects way, doind othe assignments.
+I was busy by "removing obstacles" from projects way, doing other assignments.
+
+##### 11-03-2019
+Research on how to [treading](https://doc.rust-lang.org/std/thread/) in Rust.  
+Implement threading to TCP listener and connector.
+
+##### 11-03-2019
+Study [Error Handling](https://doc.rust-lang.org/1.30.0/book/2018-edition/ch09-00-error-handling.html).  
+Found that connections only work within a network but not with public IP (consult mentor).
 
 ##### 15-03-2019
-Whached few videos about Rust. [Is It Time to Rewrite the Operating System in Rust?](https://youtu.be/HgtRAbE1nBM) was very nice.
+Watched few videos about Rust. [Is It Time to Rewrite the Operating System in Rust?](https://youtu.be/HgtRAbE1nBM) was very nice.  
+Created virtual machines on cloud and connections work between them (Azure almost out of credit).
 
 ##### 18-03-2019
-Did some code clean-up.
-Merged learning and blockchain branches to master.
+Did some code clean-up.  
+Merged learning and blockchain branches to master.  
+Peer2peer branch crate's function broke after Rust update.
+- seems to be a problem passing static variables into functions.  
+Learned that connections through router's public IP need to port forward the router, decided to make network local.
+
+#### 21-03-2019
+Created 1 virtual machine to test the network connections.  
+- Currently only did test between 1 virtual machine and host machine.
+- Planning on cloning another virtual machine and use another laptop to test (approx 4 machines).  
+Did some documentation, will polish it more.
+
+
+
