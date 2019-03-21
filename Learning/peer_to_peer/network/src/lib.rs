@@ -1,3 +1,4 @@
+
 pub mod connector {
     use std::io::{self, ErrorKind, Read, Write};
     use std::net::TcpStream;
@@ -7,11 +8,12 @@ pub mod connector {
 
     const MSG_SIZE: usize = 32;
 
-    pub fn connect(ip_address: &str){
-        println!("Trying to connect {}...", ip_address);
-        let ip_port = format!("{}:{}", ip_address, "6000");
 
-        if let Ok(mut client) = TcpStream::connect(ip_port) {
+    pub fn connect(ip_address: &'static str){
+        println!("Trying to connect {}...", ip_address);
+        let ip_port = format!("{}:{}", ip_address, "6000"); // combine ip address and port
+
+        if let Ok(mut client) = TcpStream::connect(ip_port) { // if connected to a listener
             client.set_nonblocking(true).expect("Failed to initialize non-blocking.");
 
             let (sender, receiver) = mpsc::channel::<String>();
@@ -30,7 +32,7 @@ pub mod connector {
                         println!("Connection with {} was terminated.", ip_address);
                         break;
                     } // OK, Err
-                } // match
+                } // match read
 
                 match receiver.try_recv(){
                     Ok(msg) => {
@@ -42,10 +44,10 @@ pub mod connector {
                     },
                     Err(TryRecvError::Empty) => (),
                     Err(TryRecvError::Disconnected) => break
-                } // match
+                } // match receive
 
                 thread::sleep(Duration::from_millis(100));
-            });
+            }); // thread
 
             println!("Write a message: ");
 
@@ -65,7 +67,8 @@ pub mod connector {
     } // connect()
 } // connector
 
-pub mod server {
+
+pub mod listener {
     use std::io::{ErrorKind, Read, Write};
     use std::net::TcpListener;
     use std::sync::mpsc;
@@ -126,4 +129,4 @@ pub mod server {
             thread::sleep(::std::time::Duration::from_millis(100));
         } // sleep()
     } // ini_server()
-} // server
+} // listener

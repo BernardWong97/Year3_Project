@@ -1,11 +1,10 @@
-// use std::io;
 use std::thread;
 use std::time::Duration;
-use node::connector::connect;
-use node::server::ini_server;
+use network::connector::connect;
+use network::listener::ini_server;
 
-const IP_ADDRESS: &str = "192.168.1.21";
-static NETWORK: [&str; 2] = ["192.168.1.21", "192.168.1.24"];
+const IP_ADDRESS: &str = "192.168.70.1";
+static NETWORK: [&str; 2] = ["192.168.70.1", "192.168.70.129"];
 
 fn main() {
     let mut children = vec![]; // A vector to hold the child-threads.
