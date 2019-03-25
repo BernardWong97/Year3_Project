@@ -58,6 +58,7 @@
 #### Week 6 (11<sup>th</sup> March 2019 - 15<sup>th</sup> March 2019)
     Mindaugas:
     - Watched few Youtube videos about Rust.
+    - Taking down project's external obstacles -> doing other subject's project.
     
     Bernard:
     - Study Rust error handling.
