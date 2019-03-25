@@ -1,6 +1,6 @@
 ## Blockchain design
 
-#### Here is blockchain desigh. Will be updted as project progesses.
+#### Here is blockchain design. Will be updated as project progress.
 
 ``` bash
 Blockchain: {
@@ -34,7 +34,7 @@ Blockchain: {
 
 ```
 
-#### Project file tructure. Will be updated as project progress.
+#### Project file structure. Will be updated as project progress.
 
 ``` bash
     src:

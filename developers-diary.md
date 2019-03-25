@@ -43,7 +43,7 @@ Mindaugas:
 Created a BlockChain (2 of them) by following tutorials.
 
 ###### 09-02-2019
-Researching on BlockChain. Preparing main pars for the Block in the BlockChain.
+Researching on BlockChain. Preparing main parts for the Block in the BlockChain.
 Did research on Merkle Trees.
 
 ###### 09-02-2019
@@ -72,7 +72,7 @@ Testing supported development
 ##### 25-02-2019
 Research on peer to peer BlockChain network.  
 Referencing Go programming language [tutorial](https://medium.com/@mycoralhealth/code-a-simple-p2p-blockchain-in-go-46662601f417).  
-Develop an server/client application by referencing this [tutorial](https://steemit.com/technology/@tensor/rust-project-native-chat-app).  
+Develop a server/client application by referencing this [tutorial](https://steemit.com/technology/@tensor/rust-project-native-chat-app).  
 Create a branch focusing on developing and learning peer2peer application.
 
 ##### 26-02-2019
@@ -85,7 +85,7 @@ We planed next week tasks:
 Researched on [Rust Work-spaces](https://doc.rust-lang.org/1.30.0/book/second-edition/ch14-03-cargo-workspaces.html). It will be needed to help manage project.</br>
 Did some research on available Rust crypto crates:
 - [rust-crypto](https://crates.io/crates/rust-crypto) - loads of cryptos, but last time updated 3 years ago.
-- [ring](https://crates.io/crates/ring) - recomended by a person from an IRC chat.
+- [ring](https://crates.io/crates/ring) - recommended by a person from an IRC chat.
 - [bcrypt](https://crates.io/crates/bcrypt)
 
 </br>
@@ -94,10 +94,10 @@ Did some research on available Rust crypto crates:
 
 ##### 01-03-2019
 Refactored blockchain implementation:
-- spited into files
+- split into files
 - removed `struct BlockLoad`
 - added `struct Message`
-- gegericlized code (add more generics)
+- generalized code (add more generics)
 
 ##### 04-03-2019
 Asked a question on [StackOverflow](https://stackoverflow.com/questions/54992166/in-rust-cargo-can-i-run-two-main-in-a-single-execution).  
@@ -112,8 +112,6 @@ I was busy by "removing obstacles" from projects way, doing other assignments.
 ##### 11-03-2019
 Research on how to [treading](https://doc.rust-lang.org/std/thread/) in Rust.  
 Implement threading to TCP listener and connector.
-
-##### 11-03-2019
 Study [Error Handling](https://doc.rust-lang.org/1.30.0/book/2018-edition/ch09-00-error-handling.html).  
 Found that connections only work within a network but not with public IP (consult mentor).
 
@@ -133,6 +131,10 @@ Created 1 virtual machine to test the network connections.
 - Currently only did test between 1 virtual machine and host machine.
 - Planning on cloning another virtual machine and use another laptop to test (approx 4 machines).  
 Did some documentation, will polish it more.
+
+#### 25-04-2019
+Solved conflicts and merge peer2peer branch to master branch.
+Did not do much as other multiple course module projects are due in the meantime.
 
 
 
