@@ -35,6 +35,17 @@ impl<T> Node <T> {
         Ok(())
     }
 
+    /// get network status
+    pub fn get_status(&self) -> Result<String, Error> { // ??custom error, response
+        let status: bool = true; // check status
+        if status {
+            Ok(String::from("All good!"))
+        }
+        else {
+            Err("Oh no!")
+        }
+    }
+
     ///
     /// Get message
     ///
@@ -45,7 +56,7 @@ impl<T> Node <T> {
     ///
     /// Send message
     ///
-    pub fn send_message(&mut self, message: T)  {  // ?? add error if buffer is full
+    pub fn send_message(&mut self, message: T) -> Result<(), Error> {  // ?? add error if buffer is full
         self.out_buffer.push_back(message)
     }
 
@@ -59,5 +70,6 @@ mod tests {
     #[test]
     fn it_works() {
         assert_eq!(2 + 2, 4);
+        assert!(false, "unimplemented");
     }
 }

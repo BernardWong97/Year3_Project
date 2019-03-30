@@ -60,7 +60,7 @@ where
         let mut hasher = Sha256::new();
         self.iter().for_each(|e| hasher.input(e.hash()));
 
-        clone_into_array(hasher.result().as_slice())
+        hashable::clone_into_array(hasher.result().as_slice())
     }
 }
 
@@ -73,7 +73,7 @@ where
         hasher.input(self.header.hash());
         hasher.input(self.load.hash());
 
-        clone_into_array(hasher.result().as_slice())
+        hashable::clone_into_array(hasher.result().as_slice())
     }
 }
 
