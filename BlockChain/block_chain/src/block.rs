@@ -20,7 +20,7 @@ pub struct Block<T> {
 #[allow(dead_code)]
 impl<T> Block<T>
 where
-    T: Hashable + Default
+    T: Hashable
 {
     ///
     /// Creates new block
@@ -66,7 +66,7 @@ where
 
 impl<T> Hashable for Block<T>
 where
-    T: Hashable + Default,
+    T: Hashable,
 {
     fn hash(&self) -> HashSha256 {
         let mut hasher = Sha256::new();
@@ -81,29 +81,12 @@ where
 
 #[test]
 fn test_block_serde() {
-    let mut block: Block<Transaction<String, String>> = Block::genesis();
-    let mut transaction: Transaction<String, String> = Transaction::default();
-    transaction
-        .add_sender(String::from("s1"))
-        .add_receiver(String::from("r1"))
-        .add_value(String::from("Some value"))
-        .add_load(String::from("load 1"));
+    let mut block: Block<Transaction<String>> = Block::genesis();
+    let transaction = Transaction::new("s-1", "r-1", "message 1-1".to_string());
     block.load.push(transaction);
-
-    let mut transaction: Transaction<String, String> = Transaction::default();
-    transaction
-        .add_sender(String::from("s2"))
-        .add_receiver(String::from("r2"))
-        .add_value(String::from("Some value"))
-        .add_load(String::from("load 2"));
+    let transaction = Transaction::new("s-2", "r-2", "message 2-2".to_string());;
     block.load.push(transaction);
-
-    let mut transaction: Transaction<String, String> = Transaction::default();
-    transaction
-        .add_sender(String::from("s3"))
-        .add_receiver(String::from("r3"))
-        .add_value(String::from("Some value"))
-        .add_load(String::from("load 3"));
+    let transaction = Transaction::new("s-3", "r-3", "message 3-3".to_string());
     block.load.push(transaction);
 
     // Convert the Block to a JSON string.
@@ -111,7 +94,7 @@ fn test_block_serde() {
     println!("serialized = {}", serialized);
 
     // Convert the JSON string back to a Block.
-    let deserialized: Block<Transaction<String, String>> =
+    let deserialized: Block<Transaction<String>> =
         serde_json::from_str(&serialized).unwrap();
     println!("deserialized = {:#?}", deserialized);
 

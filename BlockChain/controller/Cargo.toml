@@ -5,3 +5,6 @@ authors = ["Mindaugas Sharskus <g00339629@gmit.ie>"]
 edition = "2018"
 
 [dependencies]
+block_chain = { path = "../block_chain" }
+miner = { path = "../miner" }
+node = { path = "../node" }
