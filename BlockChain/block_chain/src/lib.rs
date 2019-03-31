@@ -7,7 +7,7 @@ mod block;
 /// # author: Mindaugas Sharskus
 /// # date: 15-20-2019
 ///
-mod block_header;
+pub mod block_header;
 pub mod db;
 pub mod hashable;
 pub mod message;

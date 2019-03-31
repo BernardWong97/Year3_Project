@@ -12,45 +12,67 @@
 use std::thread;
 
 use sha2;
-use block_chain::Block;
+use block_chain::block_header::BlockHeader;
 use block_chain::hashable::{Hashable, HashSha256};
 use block_chain::hashable;
+use std::thread::JoinHandle;
 
 #[derive(Debug)]
-struct Miner<'a, T: 'a>{
-    block: &'a mut Block<T>,
+struct Miner<'a>{
+    header: &'a BlockHeader,
 }
 
-impl<'a, T> Miner<'a, T>
-where
-    T: Hashable
-{
-    pub fn new(block: &'a mut Block<T>) -> Self {
-        Self{ block }
+impl<'a> Miner<'a> {
+
+    pub fn new(header: &'a BlockHeader) -> Self {
+        Self{ header }
     }
 
-    pub fn run(&mut self) -> usize {
+    pub fn run(&self) -> usize {
+        let mut tmp = self.header.clone();
+
         loop {
-            let hash = self.block.header.hash();
+            let hash = tmp.hash();
 //            println!("{:?}", &hash);
 
-            let slice = &hash[..self.block.header.difficulty];
+            let slice = &hash[..tmp.difficulty];
             let num = slice
                 .iter()
-                .filter(|e| *e != &0x0u8)
+                .filter(|e| *e != &0u8)
                 .count();
 
             if num == 0 {
-                let nonce = self.block.header.nonce;
-                println!("Found {:?}", nonce);
-                println!("{:?}", &hash);
+                let nonce = tmp.nonce;
+//                println!("Found {:?}", nonce);
+//                println!("{:?}", &hash);
 
                 break nonce;
             }
 
-            self.block.header.increase_nonce();
+            tmp.increase_nonce();
         }
+    }
 
+    pub fn start_thread(&self) -> JoinHandle<usize> {
+        let mut header = self.header.clone();
+
+        thread::spawn(move || {
+            loop {
+                let hash = header.hash();
+                let slice = &hash[..header.difficulty];
+
+                let n = slice
+                    .iter()
+                    .filter(|e| *e != &0u8)
+                    .count();
+
+                if n == 0 {
+                    break header.nonce;
+                }
+
+                header.increase_nonce();
+            }
+        })
     }
 }
 
@@ -70,7 +92,7 @@ mod tests {
         block.add_record(String::from("genesis"));
         block.add_record(String::from("genesis1"));
 
-        let miner = Miner::new(&mut block);
+        let miner = Miner::new(& block.header);
 
         println!("{:?}", miner);
 
@@ -85,41 +107,44 @@ mod tests {
         block.add_record(String::from("hi"));
         block.add_record(String::from("Rust"));
 
-
-//        for x in 0..10 {
-//            let hash = block.header.hash();
-//            let slice = &hash[..block.header.difficulty];
-//            println!("{:?}", slice);
-
-//            let mut miner = Miner::new(&mut block);
-//            miner.run();
-
-//            println!("{:?}", miner);
-//        }
-
-
-
-
-//        let miner = Miner::new(&mut block);
-//        miner.run();
-
-//        println!("{:?}", miner);
-
-
-
+        // copy header ..
+        let header = block.header.clone();
+        // .. and pass it to the thread
         let child = thread::spawn(move || {
-            let mut miner = Miner::new(&mut block);
+            let mut miner = Miner::new(& header);
             miner.run()
         });
 
-
+        // Wait for tread to finish and take result (nonce)
         let res = child.join();
 
         println!("{:?}", res);
-//        println!("{:?}", &block);
+        println!("{:?}", &block.header);
+
+        println!("hash before: {:?}", &block.header.hash());
+
+        // update original header with a given value
+        block.header.set_nonce(res.unwrap());
+        println!("{:?}", &block.header);
+        println!("hash after: {:?}", &block.header.hash());
 
         assert!(false);
+    }
 
+    #[test]
+    fn test_threaded_mining() {
+        let mut block = Block::genesis();
+        let mut block = block.next();
+        block.header.set_difficulty(2usize);
+        block.add_record(String::from("hi"));
+        block.add_record(String::from("Rust"));
 
+        let miner = Miner::new(&block.header);
+        let handle = miner.start_thread();
+        let result = handle.join().unwrap();
+
+        println!("nonce: {:?}", result);
+
+        assert!(false);
     }
 }
