@@ -22,18 +22,23 @@ struct Miner<'a>{
     header: &'a BlockHeader,
 }
 
+#[allow(dead_code)]
 impl<'a> Miner<'a> {
-
+    ///
+    /// create new miner
+    ///
     pub fn new(header: &'a BlockHeader) -> Self {
         Self{ header }
     }
 
-    pub fn run(&self) -> usize {
+    ///
+    /// start mining (current thread)
+    ///
+    pub fn start(&self) -> usize {
         let mut tmp = self.header.clone();
 
         loop {
             let hash = tmp.hash();
-//            println!("{:?}", &hash);
 
             let slice = &hash[..tmp.difficulty];
             let num = slice
@@ -43,8 +48,6 @@ impl<'a> Miner<'a> {
 
             if num == 0 {
                 let nonce = tmp.nonce;
-//                println!("Found {:?}", nonce);
-//                println!("{:?}", &hash);
 
                 break nonce;
             }
@@ -53,6 +56,9 @@ impl<'a> Miner<'a> {
         }
     }
 
+    ///
+    /// Start mining on new thread
+    ///
     pub fn start_thread(&self) -> JoinHandle<usize> {
         let mut header = self.header.clone();
 
@@ -96,7 +102,7 @@ mod tests {
 
         println!("{:?}", miner);
 
-        assert!(false);
+//        assert!(false);
     }
 
     #[test]
@@ -112,7 +118,7 @@ mod tests {
         // .. and pass it to the thread
         let child = thread::spawn(move || {
             let mut miner = Miner::new(& header);
-            miner.run()
+            miner.start()
         });
 
         // Wait for tread to finish and take result (nonce)
@@ -128,7 +134,7 @@ mod tests {
         println!("{:?}", &block.header);
         println!("hash after: {:?}", &block.header.hash());
 
-        assert!(false);
+//        assert!(false);
     }
 
     #[test]
@@ -145,6 +151,13 @@ mod tests {
 
         println!("nonce: {:?}", result);
 
-        assert!(false);
+        block.header.set_nonce(result);
+        let new_hash = block.header.hash();
+        let new_slice = &new_hash[..block.header.difficulty].to_vec();
+        let expected = vec![0u8; block.header.difficulty];
+
+        assert_eq!(new_slice, &expected);
+
+//        assert!(false);
     }
 }
