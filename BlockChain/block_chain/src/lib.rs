@@ -19,7 +19,7 @@ use std::convert::AsMut;
 use std::mem;
 use uuid::Uuid;
 
-use crate::block::Block;
+pub use crate::block::Block;
 use crate::db::ChainDB;
 use crate::db::DB;
 use crate::hashable::clone_into_array;

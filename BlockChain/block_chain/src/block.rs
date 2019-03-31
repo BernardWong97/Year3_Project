@@ -3,14 +3,14 @@ use sha2::{Digest, Sha256, Sha512};
 use std::fmt::Debug;
 
 use crate::block_header::BlockHeader;
-use crate::hashable::clone_into_array;
+use crate::hashable;
 use crate::hashable::HashSha256;
 use crate::hashable::Hashable;
 use crate::transaction::Transaction;
 
 //////////////////////////////// Block ////////////////////////////
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct Block<T> {
     pub header: BlockHeader,
     //    load: BlockLoad<Transaction<String>>,
@@ -20,7 +20,7 @@ pub struct Block<T> {
 #[allow(dead_code)]
 impl<T> Block<T>
 where
-    T: Hashable + Default,
+    T: Hashable + Default
 {
     ///
     /// Creates new block
