@@ -15,8 +15,8 @@ pub struct BlockHeader {
     index: u32,
     prev_hash: HashSha256,
     time_stamp: u64,
-    difficulty: usize,
-    nonce: usize,
+    pub difficulty: usize,
+    pub nonce: usize,
     // https://sitano.github.io/merkle_light/merkle_light/index.html#modules
     //    merkle: BlockHash,    TODO: do it later if we have time for it
     //    blockchain_uuid:
@@ -36,7 +36,7 @@ impl BlockHeader {
                 .duration_since(UNIX_EPOCH)
                 .unwrap_or_default()
                 .as_secs(),
-            difficulty: 0usize,
+            difficulty: 1usize,
             nonce: 0usize,
         }
     }

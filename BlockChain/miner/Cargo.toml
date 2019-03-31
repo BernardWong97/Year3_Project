@@ -5,3 +5,5 @@ authors = ["Mindaugas Sharskus <g00339629@gmit.ie>"]
 edition = "2018"
 
 [dependencies]
+sha2 = "0.8"
+block_chain = { path = "../block_chain" }

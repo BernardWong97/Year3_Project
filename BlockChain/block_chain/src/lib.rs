@@ -7,7 +7,7 @@ mod block;
 /// # author: Mindaugas Sharskus
 /// # date: 15-20-2019
 ///
-mod block_header;
+pub mod block_header;
 pub mod db;
 pub mod hashable;
 pub mod message;
@@ -19,7 +19,7 @@ use std::convert::AsMut;
 use std::mem;
 use uuid::Uuid;
 
-use crate::block::Block;
+pub use crate::block::Block;
 use crate::db::ChainDB;
 use crate::db::DB;
 use crate::hashable::clone_into_array;
