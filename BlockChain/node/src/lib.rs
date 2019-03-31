@@ -4,6 +4,27 @@
 
 use std::collections::VecDeque;
 use std::error::Error;
+use std::fmt;
+
+#[derive(Debug)]
+struct NodeError<'a>{
+    err: &'a str,
+}
+
+impl<'a> NodeError<'a> {
+    pub fn new(err:&'a str) -> Self {
+        Self{ err }
+    }
+}
+
+impl<'a> Error for NodeError<'a> {
+}
+
+impl<'a> fmt::Display for NodeError<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Node error is here!")
+    }
+}
 
 #[derive(Debug)]
 pub struct Node<T> {    // T for messages type. Can be a simple as string or custom struct
@@ -12,8 +33,7 @@ pub struct Node<T> {    // T for messages type. Can be a simple as string or cus
     // ... more ??
 }
 
-
-
+#[allow(dead_code)]
 impl<T> Node <T> {
     ///
     /// Create new node
@@ -36,13 +56,13 @@ impl<T> Node <T> {
     }
 
     /// get network status
-    pub fn get_status(&self) -> Result<String, Error> { // ??custom error, response
+    pub fn get_status(&self) -> Result<String, Box<dyn Error>> { // ??custom error, response
         let status: bool = true; // check status
         if status {
             Ok(String::from("All good!"))
         }
         else {
-            Err("Oh no!")
+            Err(Box::new(NodeError::new("node error")))
         }
     }
 
@@ -50,14 +70,14 @@ impl<T> Node <T> {
     /// Get message
     ///
     pub fn get_message(&mut self) -> Option<T> {
-        self.in_buffer.pop_front()?
+        self.in_buffer.pop_front()
     }
 
     ///
     /// Send message
     ///
-    pub fn send_message(&mut self, message: T) -> Result<(), Error> {  // ?? add error if buffer is full
-        self.out_buffer.push_back(message)
+    pub fn send_message(&mut self, message: T) -> Result<(), Box<dyn Error>> {  // ?? add error if buffer is full
+        Ok(self.out_buffer.push_back(message))
     }
 
     // ??... other methods.. ??
