@@ -133,8 +133,21 @@ Created 1 virtual machine to test the network connections.
 Did some documentation, will polish it more.
 
 #### 25-04-2019
+Researched [Rocket](https://rocket.rs/) examples.
+
+#### 25-04-2019
 Solved conflicts and merge peer2peer branch to master branch.
 Did not do much as other multiple course module projects are due in the meantime.
 
+#### 30-04-2019
+Planed app structure.
+- [Ceated skeleton](https://gitlab.com/My-/year3_project/commit/674f0723c59425982545d1af44b40c00bbdadc2e) for main app components.
+- and adde about .md files to each crate.
+
+#### 31-04-2019
+Worked on [Gan chart](https://gitlab.com/My-/year3_project/boards).
+- Added issues for majoraty of app functionality.
+- Closed some old irelevant issues.
+- Rearanged issues in Gan chart by they priority and current status.
 
 
