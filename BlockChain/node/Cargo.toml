@@ -5,3 +5,4 @@ authors = ["Mindaugas Sharskus <g00339629@gmit.ie>"]
 edition = "2018"
 
 [dependencies]
+eventual = "0.1.7"
