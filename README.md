@@ -95,3 +95,6 @@ Parts:
 
 **API in Rust**:
 - [Rocket + Diesel](https://dzone.com/articles/creating-a-rest-api-in-rust-using-rocket-and-diese) (Dzone)
+- [Rest API in Rust](https://dev.to/gruberb/web-development-with-rust-03-x-create-a-rest-api-3i82) (dev.to)
+- [Building CRUD API in Rust](https://medium.com/sean3z/building-a-restful-crud-api-with-rust-1867308352d8) (Medium)
+- [Rust for the Web](https://medium.com/@eugeniyoz/restful-api-in-rust-impressions-63250d611d15) (Medium)
