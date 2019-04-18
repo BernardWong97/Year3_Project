@@ -1,5 +1,7 @@
 //!
 //! AppConfig responsible for App configuration (settings).
+//! Then created it reads settings from a given file and loads them to
+//! `AppConfig.settings` field.
 //!
 //! Author: Mindaugas Sharskus
 //! Date: 18-04-2019
@@ -13,8 +15,8 @@ use std::fs;
 use std::collections;
 
 use serde::{Deserialize, Serialize, Serializer};
+use std::collections::hash_map::Entry;
 
-const APP_FILE:&'static str = "settings_file.txt";
 
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -25,8 +27,10 @@ pub struct AppConfig<'a>{
 
 #[allow(dead_code)]
 impl <'a>AppConfig<'a>{
-
-    pub fn get_settings(settings_file: &str) -> Result<Self, Error>{
+    ///
+    /// Creates new `AppConfig` from a given file.
+    ///
+    pub fn from(settings_file: &'a str) -> Result<Self, Error>{
         let mut settings = collections::HashMap::new();
         let file = fs::File::open(settings_file)?;
         let buffered = io::BufReader::new(file);
@@ -39,18 +43,24 @@ impl <'a>AppConfig<'a>{
 
 //        settings = buffered.lines()
 //            .map(|line| line.unwrap())
-//            .map(|l| l.split(':').collect())
-//            .map(|g| g)
+//            .map(|l| l.split(':').collect::<Vec<_>>())
+//            .map(|g| collections::hash_map::Entry(g[0], g[1]))
 //            .collect();
 
         let this = Self{
-            settings_file_name: APP_FILE,
+            settings_file_name: settings_file,
             settings,
         };
 
         Ok(this)
     }
 
+    ///
+    /// Gets requested setting value
+    ///
+    pub fn get_value(&self, key: &str) -> Option<&String> {
+        self.settings.get(key)
+    }
 
 }
 
@@ -68,7 +78,8 @@ fn test_read_file() -> Result<(), Error> {
     writeln!(file, "{}", option1);
     writeln!(file, "{}", option2);
 
-    let config = AppConfig::get_settings(test_file)?;
+    let config = AppConfig::from(test_file)?;
+    fs::remove_file(test_file)?;
 
     println!("{:#?}", config.settings);
 
@@ -84,6 +95,27 @@ fn test_read_file() -> Result<(), Error> {
     assert!(config.settings.contains_key(op2[0]));
     assert_eq!(Some(&op2[1].to_string()), config.settings.get(op2[0]));
 
+//    assert!(false);
+    Ok(())
+}
+
+#[test]
+fn test_config_get_settings_value() -> Result<(), Error> {
+    let test_file = "test_file.tmp";
+    let mut file = fs::File::create(test_file)?;
+
+    let test = vec!["key1", "val1", "key2", "val2"];
+    writeln!(file, "{}:{}",      test[0], test[1]);
+    writeln!(file, "  {}  : {}", test[2], test[3]);
+
+    let config = AppConfig::from(test_file)?;
+    fs::remove_file(test_file)?;    // house keeping remove temporary file
+
+
+    assert_eq!(Some(&test[1].to_string()), config.get_value(test[0]));
+    assert_eq!(Some(&test[3].to_string()), config.get_value(test[2]));
+
+    println!("{:#?}", config.settings);
 //    assert!(false);
     Ok(())
 }
