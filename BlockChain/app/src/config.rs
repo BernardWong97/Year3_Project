@@ -34,7 +34,7 @@ impl <'a>AppConfig<'a>{
         for line in buffered.lines(){
             let value = line?;
             let entry = value.split(':').map(|l| l.trim()).collect::<Vec<_>>();
-            settings.insert(entry[0].trim().to_string(), entry[1].trim().to_string());
+            settings.insert(entry[0].to_string(), entry[1].to_string());
         }
 
 //        settings = buffered.lines()
@@ -68,10 +68,22 @@ fn test_read_file() -> Result<(), Error> {
     writeln!(file, "{}", option1);
     writeln!(file, "{}", option2);
 
-    let settings = AppConfig::get_settings(test_file);
+    let config = AppConfig::get_settings(test_file)?;
 
-    println!("{:#?}", settings?.settings);
+    println!("{:#?}", config.settings);
 
-    assert!(false);
+    let op1 = option1.split(':')
+        .map(|l| l.trim())
+        .collect::<Vec<_>>();
+    assert!(config.settings.contains_key(op1[0]));
+    assert_eq!(Some(&op1[1].to_string()), config.settings.get(op1[0]));
+
+    let op2 = option2.split(':')
+        .map(|l| l.trim())
+        .collect::<Vec<_>>();
+    assert!(config.settings.contains_key(op2[0]));
+    assert_eq!(Some(&op2[1].to_string()), config.settings.get(op2[0]));
+
+//    assert!(false);
     Ok(())
 }
