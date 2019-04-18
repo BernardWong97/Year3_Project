@@ -37,7 +37,12 @@ impl <'a>AppConfig<'a>{
 
         for line in buffered.lines(){
             let value = line?;
-            let entry = value.split(':').map(|l| l.trim()).collect::<Vec<_>>();
+            let entry = value.split(':')
+                .map(|l| l.trim())
+                .collect::<Vec<_>>();
+
+            if entry.len() > 2 { panic!(format!("more than 1 setting value is found {:#?}", entry)); }
+
             settings.insert(entry[0].to_string(), entry[1].to_string());
         }
 
