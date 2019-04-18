@@ -1,0 +1,8 @@
+[workspace]
+members = [
+    "block_chain",
+     "node",
+    "miner",
+     "app",
+#     "api",
+]
