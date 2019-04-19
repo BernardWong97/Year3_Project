@@ -6,4 +6,13 @@ edition = "2018"
 
 [dependencies]
 sha2 = "0.8"
+rocket = { version = "0.4.0", default-features = false }
+serde = "1.0"
+serde_json = "1.0"
+serde_derive = "1.0"
+
 block_chain = { path = "../block_chain" }
+
+[dependencies.rocket_contrib]
+default-features = false
+features = ["json"]
