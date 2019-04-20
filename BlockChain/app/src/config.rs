@@ -8,25 +8,24 @@
 //!
 
 
-//use std::error::Error;
+//#![allow(unused_imports)]
+
+#[allow(unused_imports)]
+use std::io::Write;
+use std::io::{Error, BufRead};
 use std::io;
-use std::io::{Write, Error, BufRead};
 use std::fs;
 use std::collections;
 
-use serde::{Deserialize, Serialize, Serializer};
-use std::collections::hash_map::Entry;
 
-
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct AppConfig<'a>{
+#[derive( Debug)]
+pub struct Config<'a>{
     settings_file_name: &'a str,
     settings: collections::HashMap<String, String>,
 }
 
 #[allow(dead_code)]
-impl <'a>AppConfig<'a>{
+impl <'a>Config<'a>{
     ///
     /// Creates new `AppConfig` from a given file.
     ///
@@ -41,16 +40,9 @@ impl <'a>AppConfig<'a>{
                 .map(|l| l.trim())
                 .collect::<Vec<_>>();
 
-            if entry.len() > 2 { panic!(format!("more than 1 setting value is found {:#?}", entry)); }
-
+            if entry.len() > 2 { panic!(format!("more than 1 setting value is found {:#?}", entry)) }
             settings.insert(entry[0].to_string(), entry[1].to_string());
         }
-
-//        settings = buffered.lines()
-//            .map(|line| line.unwrap())
-//            .map(|l| l.split(':').collect::<Vec<_>>())
-//            .map(|g| collections::hash_map::Entry(g[0], g[1]))
-//            .collect();
 
         let this = Self{
             settings_file_name: settings_file,
@@ -67,12 +59,43 @@ impl <'a>AppConfig<'a>{
         self.settings.get(key)
     }
 
+    ///
+    /// Sets setting key to a given value
+    ///
+    pub fn set_to(&mut self, key: &str, value: &str ) -> Result<(), Error> {
+        self.settings.entry(key.to_string()).and_modify(|e| {
+            e.clear();
+            e.push_str(value);
+        });
+
+        self.save_to_file()
+    }
+
+    ///
+    /// Saves settings to file
+    ///
+    #[allow(unused_must_use)]
+    fn save_to_file(&self) -> Result<(), Error> {
+        let mut file = fs::OpenOptions::new()
+            .append(false)
+            .write(true)
+            .open(self.settings_file_name)?;
+
+        self.settings.iter()
+            .for_each(|(k, v)|{
+                writeln!(file, "{}:{}", k, v);
+            });
+
+        Ok(())
+    }
+
 }
 
 
 /////////////////////////// TESTs ////////////////////////////
 
 #[test]
+#[allow(unused_must_use)]
 fn test_read_file() -> Result<(), Error> {
     let test_file = "test_file.tmp";
     fs::File::create(test_file)?;
@@ -80,11 +103,11 @@ fn test_read_file() -> Result<(), Error> {
 
     let option1 = "key1:value1";
     let option2 = " key2  : value2 ";
-    writeln!(file, "{}", option1);
-    writeln!(file, "{}", option2);
+    writeln!(file, "{}", option1)?;
+    writeln!(file, "{}", option2)?;
 
-    let config = AppConfig::from(test_file)?;
-    fs::remove_file(test_file)?;
+    let config = Config::from(test_file)?;
+    fs::remove_file(test_file)?;    // house keeping remove temporary file
 
     println!("{:#?}", config.settings);
 
@@ -105,7 +128,29 @@ fn test_read_file() -> Result<(), Error> {
 }
 
 #[test]
+#[allow(unused_must_use)]
 fn test_config_get_settings_value() -> Result<(), Error> {
+    let test_file = "test_file.tmp";
+    let mut file = fs::File::create(test_file)?;
+
+    let test = vec!["key1", "val1", "key2", "val2"];
+    writeln!(file, "{}:{}",      test[0], test[1])?;
+    writeln!(file, "  {}  : {}", test[2], test[3])?;
+
+    let config = Config::from(test_file)?;
+    fs::remove_file(test_file)?;    // house keeping remove temporary file
+
+    assert_eq!(Some(&test[1].to_string()), config.get_value(test[0]));
+    assert_eq!(Some(&test[3].to_string()), config.get_value(test[2]));
+
+    println!("{:#?}", config.settings);
+//    assert!(false);
+    Ok(())
+}
+
+#[test]
+#[allow(unused_must_use)]
+fn test_config_set_settings_value() -> Result<(), Error> {
     let test_file = "test_file.tmp";
     let mut file = fs::File::create(test_file)?;
 
@@ -113,14 +158,17 @@ fn test_config_get_settings_value() -> Result<(), Error> {
     writeln!(file, "{}:{}",      test[0], test[1]);
     writeln!(file, "  {}  : {}", test[2], test[3]);
 
-    let config = AppConfig::from(test_file)?;
-    fs::remove_file(test_file)?;    // house keeping remove temporary file
+    let mut config = Config::from(test_file)?;
+    config.set_to("key1", "value-1")?;
+    config.set_to("key2", "value-2")?;
 
+    let config2 = Config::from(test_file)?;
 
-    assert_eq!(Some(&test[1].to_string()), config.get_value(test[0]));
-    assert_eq!(Some(&test[3].to_string()), config.get_value(test[2]));
+    assert_eq!(Some(&"value-1".to_string()), config2.get_value(test[0]));
+    assert_eq!(Some(&"value-2".to_string()), config2.get_value(test[2]));
 
     println!("{:#?}", config.settings);
+    fs::remove_file(test_file)?;    // house keeping remove temporary file
 //    assert!(false);
     Ok(())
 }
