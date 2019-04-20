@@ -9,22 +9,22 @@ use crate::hashable::Hashable;
 //////////////////////////////// Transaction ///////////////////////////
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
-pub struct Transaction<'a, T:'a> {
-    sender: &'a str,
-    receiver: &'a str,
+pub struct Transaction<T> {
+    sender: String,
+    receiver: String,
     value: usize,
     load: T,    // in our case it will be message
 }
 
 #[allow(dead_code)]
-impl<'a, T> Transaction<'a, T>
+impl<T> Transaction<T>
 where
     T: Hashable,
 {
-    pub fn new(sender: &'a str, receiver: &'a str, load: T) -> Self {
+    pub fn new(sender: &str, receiver: &str, load: T) -> Self {
         Self {
-            sender,
-            receiver,
+            sender: sender.to_string(),
+            receiver: receiver.to_string(),
             value: 0,
             load,
         }
@@ -33,14 +33,14 @@ where
 
 
 
-impl<'a, T> Hashable for Transaction<'a, T>
+impl<T> Hashable for Transaction<T>
 where
     T: Hashable,
 {
     fn hash(&self) -> HashSha256 {
         let mut hasher = Sha256::new();
-        hasher.input(self.sender);
-        hasher.input(self.receiver);
+        hasher.input(&self.sender);
+        hasher.input(&self.receiver);
         hasher.input(convert_u64_to_u8_array(self.value as u64));
         hasher.input(self.load.hash());
 
