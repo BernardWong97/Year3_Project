@@ -92,6 +92,7 @@ Parts:
 - [Rust Chat Application](https://steemit.com/technology/@tensor/rust-project-native-chat-app)
 - [Nice talk about OS's and what value Rust can add to them](https://www.youtube.com/watch?v=HgtRAbE1nBM)
 - [Talk about rus from Rocket crate developer](https://www.youtube.com/watch?v=cDFSrVhnZKo)
+- [Cuncurency in Rust `Send` & `Sync`](https://doc.rust-lang.org/nomicon/send-and-sync.html)
 
 **API in Rust**:
 - [Rocket + Diesel](https://dzone.com/articles/creating-a-rest-api-in-rust-using-rocket-and-diese) (Dzone)
