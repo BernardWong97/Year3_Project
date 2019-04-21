@@ -99,6 +99,11 @@ where
 
         self
     }
+
+    /// Get pending transactions
+    pub fn get_pending_transactions(&self) -> &Vec<T> {
+        &self.transactions
+    }
 }
 
 impl Hashable for String {
