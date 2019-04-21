@@ -49,3 +49,16 @@ where
 }
 
 //////////////////////////////// Tests /////////////////////////////////////////////////
+
+#[test]
+fn test_transaction_serde() {
+    let tr = Transaction::new("s-1", "r-1", "message 1-1".to_string());
+    // serialized
+    let ser = serde_json::to_string(&tr).unwrap();
+    println!("Serialifed = {}", ser);
+    //deserialized
+    let de:Transaction<String> = serde_json::from_str(&ser).unwrap();
+    println!("Deserialized = {:?}", de);
+
+    assert!(false);
+}
