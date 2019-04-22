@@ -132,23 +132,38 @@ Created 1 virtual machine to test the network connections.
 - Planning on cloning another virtual machine and use another laptop to test (approx 4 machines).  
 Did some documentation, will polish it more.
 
-#### 25-04-2019
+#### 25-03-2019
 Researched [Rocket](https://rocket.rs/) examples.
 
-#### 25-04-2019
+#### 25-03-2019
 Solved conflicts and merge peer2peer branch to master branch.
 Did not do much as other multiple course module projects are due in the meantime.
 
-#### 29-04-2019
+#### 29-03-2019
 Planed app structure.
 - [Ceated skeleton](https://gitlab.com/My-/year3_project/commit/674f0723c59425982545d1af44b40c00bbdadc2e) for main app components.
 - and added `about.md` files to each crate.
 
-#### 30-04-2019
+#### 30-03-2019
 Worked on [Gan chart](https://gitlab.com/My-/year3_project/boards).
 - Added issues for majority of app functionality.
 - Closed some old irrelevant issues.
 - Rearranged issues in Gan chart by they priority and current status.
 
-#### 31-04-2019
+#### 31-03-2019
 Implemented block miner.
+
+#### 31-03-2019 to 18-04-2019
+Other projects, MSQ's, exams
+
+#### 18-04-2019
+Implemented [`Config`](https://gitlab.com/My-/year3_project/commit/4f2e134642f6933b97c11011dacba0026bae2744), save/load setting from file
+
+#### 20-04-2019
+[Tried](https://gitlab.com/My-/year3_project/issues/25) to create Docker container. (failed)
+
+#### 19-04-2019 to 22-04-2019
+Learning [Rocket](https://rocket.rs/). Implemented [API's](https://gitlab.com/My-/year3_project/issues/16#note_162974292):
+- Miner http API
+- Transaction http API
+- Block http API
