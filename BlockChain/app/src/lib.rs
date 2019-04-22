@@ -1,4 +1,3 @@
-
 //!
 //! App app are controlling BlockChain, Node and Miner.
 //! AppController is controlled by API.
@@ -20,7 +19,7 @@ use core::fmt::Display;
 
 use serde::{Deserialize, Serialize, Serializer};
 
-use block_chain::BlockChain;
+use block_chain::{BlockChain, Block};
 use block_chain::transaction::Transaction;
 use node::Node;
 use miner::Miner;
@@ -62,13 +61,15 @@ impl convert::From<io::Error> for AppError {
 
 //////////////////////////// APP ///////////////////////////
 
+pub type Message = Transaction<String>;
+
 //#[derive(Serialize, Deserialize, Debug)]
 pub struct App <'a>{
     /// config:
     /// - blockchain_file,
     /// - node_settings,
     app_config: Config<'a>,
-    chain: BlockChain<Transaction<String>>,
+    blockchain: BlockChain<Transaction<String>>,
     node: Node<String>,
 //    miner: Miner<'a>,
 }
@@ -82,7 +83,7 @@ impl<'a> App<'a> {
 
         let this = Self {
             app_config: config,
-            chain: BlockChain::new(),
+            blockchain: BlockChain::new(),
             node: Node::new(),
         };
 
@@ -105,14 +106,14 @@ impl<'a> App<'a> {
         self.node.connect()
     }
 
-    pub fn add_transaction(&mut self, transaction: Transaction<String>) -> Result<(), Box<dyn error::Error>> {
-        self.chain.add_transaction(transaction);
+    pub fn add_transaction(&mut self, transaction: Message) -> Result<(), Box<dyn error::Error>> {
+        self.blockchain.add_transaction(transaction);
 
         Ok(())
     }
 
-    pub fn get_pending_transactions(&self) -> Result<&Vec<Transaction<String>>, Box<dyn error::Error>> {
-        Ok(self.chain.get_pending_transactions())
+    pub fn get_pending_transactions(&self) -> Result<&Vec<Message>, Box<dyn error::Error>> {
+        Ok(self.blockchain.get_pending_transactions())
     }
 
 }
