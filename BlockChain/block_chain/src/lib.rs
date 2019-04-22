@@ -5,7 +5,11 @@
 //! Block submodule
 //!
 //! # author: Mindaugas Sharskus
-//! # date: 15-20-2019
+//! # date: 15-02-2019
+//!
+//! TODO (improvements):
+//! - ?? Implement merkle tree functionality fo transaction confirmation.
+//! - ?? Create `BlockChainError` to handle `BlockChain` errors.
 //!
 
 mod block;
@@ -16,7 +20,7 @@ pub mod transaction;
 use serde::{Deserialize, Serialize, Serializer};
 use sha2::{Digest, Sha256, Sha512};
 use std::convert::AsMut;
-use std::mem;
+use std::{mem, error};
 use uuid::Uuid;
 
 pub use crate::block::Block;
@@ -25,6 +29,7 @@ use crate::hashable::convert_u64_to_u8_array;
 use crate::hashable::HashSha256;
 use crate::hashable::Hashable;
 use crate::transaction::Transaction;
+use core::borrow::BorrowMut;
 
 //////////////////////////////// Block Chain ////////////////////////////
 
@@ -32,17 +37,16 @@ use crate::transaction::Transaction;
 pub struct BlockChain<T> {
     uuid: Uuid,
     chain: Vec<Block<T>>,
-    transactions: Vec<T>, // pending transactions
+    pub transactions: Vec<T>, // pending transactions
 }
 
 #[allow(dead_code)]
 impl<T> BlockChain<T>
 where
-    T: Hashable,
+    T: Hashable, // Transaction<String>
 {
-    // TODO: Implement merkle tree functionality fo transaction confirmation.
     ///
-    /// Creates new blockchain with genesis block in it
+    /// Creates new `BlockChain` with genesis block in it
     ///
     pub fn new() -> Self {
         let mut chain = Vec::new();     // create chain
@@ -58,7 +62,9 @@ where
     ///
     /// Creates new "next" block.
     /// New block will have all pending transactions.
-    /// TODO: rewrite it
+    /// TODO:
+    /// - rewrite it
+    /// - ??? Rename to `generate_new_block ???
     ///
     pub fn create_next_block(&mut self) -> &Block<T> {
         let mut new_block = self
@@ -139,7 +145,6 @@ where
     }
 
     /// Add transaction to pending transactions
-    ///
     pub fn add_transaction(&mut self, transaction: T) -> &mut Self {
         self.transactions.push(transaction);
 
@@ -206,7 +211,7 @@ fn test_blockchain_serde() {
 
     println!("{:?}", blockchain);
 
-    assert!(false);
+//    assert!(false);
 }
 
 //////////////////////////////// Tests ////////////////////////////

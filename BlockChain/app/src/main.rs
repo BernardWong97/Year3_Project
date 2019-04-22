@@ -4,8 +4,9 @@
 //! # author: Mindaugas Sharskus
 //! # date: 20-04-2019
 //!
-//! ToDo:
-//! - remove `'static` lifetimes.
+//! ToDo (improvements):
+//! - get transactions from particular time stamp instead of getting all pending.
+//! - Create custom error for pass error information.
 
 
 #![feature(proc_macro_hygiene, decl_macro)]
@@ -33,10 +34,10 @@ use block_chain::Block;
 /// App settings file
 const CONFIG_FILE:&'static str = "settings_file.txt";
 
-
+////////////////////// Transaction /////////////////////////////////
 
 #[post("/transactions", format = "json", data = "<transaction>")]
-fn add_transaction(transaction: Json<Transaction<String>>, app: State<Mutex<App>>) -> JsonValue {
+fn add_transaction(transaction: Json<Message>, app: State<Mutex<App>>) -> JsonValue {
     let mut app = app.lock().expect("App Lock");
     let tr = transaction.0;
     app.add_transaction(tr);
@@ -46,7 +47,7 @@ fn add_transaction(transaction: Json<Transaction<String>>, app: State<Mutex<App>
 
 #[get("/transactions")]
 fn get_transactions(app: State<Mutex<App>>) -> JsonValue {
-    let mut app = app.lock().expect("App Lock");
+    let mut app = app.lock().expect("Transaction: App Lock.");
     let transactions = app.get_pending_transactions().unwrap();
 
     json!(transactions)

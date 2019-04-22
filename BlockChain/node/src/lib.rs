@@ -6,8 +6,10 @@ use std::collections::VecDeque;
 use std::error::Error;
 use std::fmt;
 
+use serde::{Deserialize, Serialize, Serializer};
+
 #[derive(Debug)]
-struct NodeError<'a>{
+pub struct NodeError<'a>{
     err: &'a str,
 }
 
@@ -26,7 +28,7 @@ impl<'a> fmt::Display for NodeError<'a> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Node<T> {    // T for messages type. Can be a simple as string or custom struct
     in_buffer: VecDeque<T>,     // https://doc.rust-lang.org/std/collections/struct.VecDeque.html
     out_buffer: VecDeque<T>,

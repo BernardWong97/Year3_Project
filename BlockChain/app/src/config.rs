@@ -3,8 +3,8 @@
 //! Then created it reads settings from a given file and loads them to
 //! `AppConfig.settings` field.
 //!
-//! Author: Mindaugas Sharskus
-//! Date: 18-04-2019
+//! # author: Mindaugas Sharskus
+//! # date: 18-04-2019
 //!
 
 

@@ -9,6 +9,7 @@
 //! - Allow for checking for mining status instead of waiting until its done.
 //! This will be needed for greater difficulty. Idea is: firs summit a job,
 //! then at separate request check if job is done (hash is mined).
+//! https://rocket.rs/v0.4/guide/state/
 
 
 #![feature(proc_macro_hygiene, decl_macro)]

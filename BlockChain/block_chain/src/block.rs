@@ -1,12 +1,23 @@
+//!
+//! `Block` is critical part of `BlockChain`
+//!
+//! # author: Mindaugas Sharskus
+//! # date: 15-02-2019
+//!
+//! ToDo:
+//! - find better name for method `add_record`.
+//! - ?? hide `BlockHeader` ??
+
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256, Sha512};
 use std::fmt::Debug;
 
 use crate::block_header::BlockHeader;
-use crate::hashable;
+use crate::{hashable, BlockChain};
 use crate::hashable::HashSha256;
 use crate::hashable::Hashable;
 use crate::transaction::Transaction;
+use core::borrow::BorrowMut;
 
 //////////////////////////////// Block ////////////////////////////
 
@@ -91,20 +102,23 @@ where
 
 #[test]
 fn test_block_serde() {
-    let mut block: Block<Transaction<String>> = Block::genesis();
-    let transaction = Transaction::new("s-1", "r-1", "message 1-1".to_string());
-    block.load.push(transaction);
-    let transaction = Transaction::new("s-2", "r-2", "message 2-2".to_string());;
-    block.load.push(transaction);
-    let transaction = Transaction::new("s-3", "r-3", "message 3-3".to_string());
-    block.load.push(transaction);
+    let test = vec![
+        "🐰",
+        "Happy",
+        "Easter",
+        "🐰",
+    ];
+    let mut block: Block<String> = Block::genesis();
+    test.iter().for_each(|t|{
+        block.add_record(t.to_string());
+    });
 
     // Convert the Block to a JSON string.
     let serialized = serde_json::to_string(&block).unwrap();
     println!("serialized = {}", serialized);
 
     // Convert the JSON string back to a Block.
-    let deserialized: Block<Transaction<String>> =
+    let deserialized: Block<String> =
         serde_json::from_str(&serialized).unwrap();
     println!("deserialized = {:#?}", deserialized);
 
@@ -112,5 +126,5 @@ fn test_block_serde() {
     assert_eq!(deserialized.load[0], block.load[0]);
     assert_ne!(deserialized.load[1], block.load[2]);
 
-    //    assert!(false);
+    assert!(false);
 }

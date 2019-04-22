@@ -4,5 +4,4 @@ members = [
      "node",
     "miner",
      "app",
-#     "api",
 ]
