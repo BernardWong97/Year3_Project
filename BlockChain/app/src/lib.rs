@@ -90,14 +90,6 @@ impl<'a> App<'a> {
         Ok(this)
     }
 
-//    pub fn load() -> Result<Self, AppError> {
-//        if let contents = fs::read_to_string(&config.filename){
-//
-//        }
-//
-//
-//    }
-
     pub fn save(&self) -> Result<(), Box<dyn error::Error>> {
         Ok(())
     }
@@ -115,6 +107,26 @@ impl<'a> App<'a> {
     pub fn get_pending_transactions(&self) -> Result<&Vec<Message>, Box<dyn error::Error>> {
         Ok(self.blockchain.get_pending_transactions())
     }
+
+    pub fn get_genesis_block(&self) -> Result<&Block<Message>, Box<dyn error::Error>> {
+        Ok(self.blockchain.get_block_genesis())
+    }
+
+    pub fn get_last_block(&self) -> Result<&Block<Message>, Box<dyn error::Error>> {
+        Ok(self.blockchain.get_block_last())
+    }
+
+    pub fn add_block(&mut self, block: Block<Message>) -> Result<(), Box<dyn error::Error>> {
+        self.blockchain.add_block(block);
+
+        Ok(())
+    }
+
+    pub fn get_blocks_from(&self, block: &Block<Message>) -> Result<&[Block<Message>], Box<dyn error::Error>> {
+        self.blockchain.get_blocks_from(block)
+    }
+
+
 
 }
 

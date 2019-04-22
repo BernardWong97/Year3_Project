@@ -12,7 +12,7 @@ use crate::hashable::{
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq)]
 pub struct BlockHeader {
     // More at: https://bitcoin.stackexchange.com/a/7332
-    index: u32,
+    pub index: usize,
     prev_hash: HashSha256,
     time_stamp: u64,
     pub difficulty: usize,
@@ -30,7 +30,7 @@ impl BlockHeader {
     ///
     pub fn first() -> Self {
         Self {
-            index: 0u32,
+            index: 0usize,
             prev_hash: HashSha256::default(),
             time_stamp: SystemTime::now()
                 .duration_since(UNIX_EPOCH)
@@ -87,12 +87,17 @@ impl BlockHeader {
 
         self
     }
+
+    /// Get previous block hash
+    pub fn get_previous_hash(&self) -> &HashSha256 {
+        &self.prev_hash
+    }
 }
 
 impl Hashable for BlockHeader {
     fn hash(&self) -> HashSha256 {
         let mut hasher = Sha256::new();
-        hasher.input(convert_u32_to_u8_array(self.index));
+        hasher.input(convert_u64_to_u8_array(self.index as u64));
         hasher.input(convert_u64_to_u8_array(self.difficulty as u64));
         hasher.input(self.prev_hash);
         hasher.input(convert_u64_to_u8_array(self.time_stamp));

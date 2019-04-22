@@ -92,6 +92,52 @@ where
     }
 
     ///
+    /// Verify and add given `Block` to the `BlockChain`.
+    /// ToDo:
+    /// - check if block belongs to our `BlockChain`
+    /// - check timestamp continuity
+    ///
+    pub fn add_block(&mut self, block: Block<T>) -> Result<&mut Self, Box<dyn error::Error>> {
+        /// Borrow last `Block` from `BlockChain`.
+        let mut last_block = self.chain.last().unwrap_or_else(||{
+            panic!("BlockChain fatal error! No blocks found.")
+        });
+
+        // Check for hash continuity
+        if block.get_prev_hash() != &last_block.hash() {
+            /// If we here it's mean we are out of sync
+            /// or someone trying to mess with blockchain.
+            panic!("Given block can't be added to current blockchain. Hash mismatch.");
+        }
+
+        // Check for index continuity
+        if block.get_index() -1 != last_block.get_index() {
+            panic!("Given block can't be added to current blockchain. Index mismatch.");
+        }
+
+        /// If all verification passes without errors: add the block.
+        self.chain.push(block);
+
+        Ok(self)
+    }
+
+    /// Get `BlockChain` genesis `Block`
+    pub fn get_block_genesis(&self) -> &Block<T> {
+        &self.chain[0]
+    }
+
+    /// Get `BlockChain` last `Block`
+    pub fn get_block_last(&self) -> &Block<T> {
+        &self.chain.last().unwrap_or_else(||{
+            panic!("BlockChain fatal error! No blocks found.")
+        })
+    }
+
+    /// Get all blocks as slice starting from a given block.
+    pub fn get_blocks_from(&self, start_block: &Block<T>) -> Result<&[Block<T>], Box<dyn error::Error>> {
+        Ok(&self.chain[start_block.get_index()..])
+    }
+
     /// Add transaction to pending transactions
     ///
     pub fn add_transaction(&mut self, transaction: T) -> &mut Self {

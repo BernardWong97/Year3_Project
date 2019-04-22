@@ -50,6 +50,16 @@ where
 
         self
     }
+
+    /// Get previous block hash
+    pub fn get_prev_hash(&self) -> &HashSha256 {
+        &self.header.get_previous_hash()
+    }
+
+    /// Get block index
+    pub fn get_index(&self) -> usize {
+        self.header.index
+    }
 }
 
 impl<T> Hashable for Vec<T>
