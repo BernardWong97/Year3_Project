@@ -104,6 +104,11 @@ where
     pub fn get_pending_transactions(&self) -> &Vec<T> {
         &self.transactions
     }
+
+    /// Get `BlockChain`s uuid
+    pub fn get_uuid(&self) -> &Uuid {
+        &self.uuid
+    }
 }
 
 impl Hashable for String {
@@ -131,17 +136,13 @@ fn test_blockchain_serde() {
     let mut blockchain = BlockChain::new(); // block #0 (genesis)
 
     // crating block #1
-    let transaction = Transaction::new("s-1", "r-1", "message 1-1".to_string());
-    blockchain.add_transaction(transaction);
-    let transaction= Transaction::new("s-2", "r-2", "message 2-2".to_string() );
-    blockchain.add_transaction(transaction);
+    Transaction::new("s-1", "r-1", "message 1-1".to_string(), blockchain.borrow_mut());
+    Transaction::new("s-2", "r-2", "message 2-2".to_string(), blockchain.borrow_mut());
     blockchain.create_next_block();
 
     // creating block #2
-    let transaction = Transaction::new("s-1", "r-2", "message 1-2".to_string());
-    blockchain.add_transaction(transaction);
-    let transaction = Transaction::new("s-2", "r-1", "message 2-1".to_string());
-    blockchain.add_transaction(transaction);
+    Transaction::new("s-1", "r-2", "message 1-2".to_string(), blockchain.borrow_mut());
+    Transaction::new("s-2", "r-1", "message 2-1".to_string(), blockchain.borrow_mut());
     blockchain.create_next_block();
 
     // Convert the Block to a JSON string.
