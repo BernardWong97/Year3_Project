@@ -34,11 +34,11 @@ pub struct TransactionID {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct Transaction<T> {
-    id: TransactionID,
-    sender: String,
-    receiver: String,
-    value: usize,
-    load: T,    // in our case it will be message
+    pub id: TransactionID,
+    pub sender: String,
+    pub receiver: String,
+    pub value: usize,
+    pub load: T,    // in our case it will be message
 }
 
 #[allow(dead_code)]

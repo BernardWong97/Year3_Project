@@ -1,7 +1,3 @@
-//#![allow(non_snake_case)]
-#![allow(unused_imports)]
-
-
 //! Block submodule
 //!
 //! # author: Mindaugas Sharskus
@@ -10,7 +6,10 @@
 //! TODO (improvements):
 //! - ?? Implement merkle tree functionality fo transaction confirmation.
 //! - ?? Create `BlockChainError` to handle `BlockChain` errors.
-//!
+//! - hide public fields
+
+
+#![allow(unused_imports)]
 
 mod block;
 pub mod block_header;
@@ -37,8 +36,8 @@ use std::fmt::Debug;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct BlockChain<T> {
     uuid: Uuid,
-    chain: Vec<Block<T>>,
-    pub transactions: Vec<T>, // pending transactions
+    pub chain: Vec<Block<T>>,
+    pub pending_transactions: Vec<T>, // pending transactions
 }
 
 #[allow(dead_code)]
@@ -56,7 +55,7 @@ where
         Self {
             uuid: Uuid::new_v4(),
             chain,
-            transactions: Vec::new(),
+            pending_transactions: Vec::new(),
         }
     }
 
@@ -65,7 +64,7 @@ where
     /// New block will have all pending transactions.
     ///
     pub fn generate_next_block(&mut self) -> Block<T> {
-        /// create temp next block using the last block.
+        // create temp next block using the last block.
         let mut new_block = self.chain
             .last()
             .unwrap_or_else(|| {
@@ -75,17 +74,14 @@ where
 
         // https://doc.rust-lang.org/error-index.html#E0507
         // second part(close to end)
-        /// Move all pending transactions to newly created block
-        mem::replace(&mut self.transactions, Vec::new())
+        // Move all pending transactions to newly created block
+        mem::replace(&mut self.pending_transactions, Vec::new())
             .into_iter()
             .for_each(|tr| {
                 new_block.add_record(tr);
             });
 
-        assert_eq!(self.transactions.len(), 0);
-
-
-        /// New next block holding all pending transactions
+        // New next block holding all pending transactions
         new_block
     }
 
@@ -96,15 +92,15 @@ where
     /// - check timestamp continuity
     ///
     pub fn add_block(&mut self, block: Block<T>) -> Result<&mut Self, Box<dyn error::Error>> {
-        /// Borrow last `Block` from `BlockChain`.
-        let mut last_block = self.chain.last().unwrap_or_else(||{
+        // Borrow last `Block` from `BlockChain`.
+        let last_block = self.chain.last().unwrap_or_else(||{
             panic!("BlockChain fatal error! No blocks found.")
         });
 
         // Check for hash continuity
         if block.get_prev_hash() != &last_block.hash() {
-            /// If we here it's mean we are out of sync
-            /// or someone trying to mess with blockchain.
+            // If we here it's mean we are out of sync
+            // or someone trying to mess with blockchain.
             panic!("Given block can't be added to current blockchain. Hash mismatch.");
         }
 
@@ -113,7 +109,7 @@ where
             panic!("Given block can't be added to current blockchain. Index mismatch.");
         }
 
-        /// If all verification passes without errors: add the block.
+        // If all verification passes without errors: add the block.
         self.chain.push(block);
 
         Ok(self)
@@ -132,20 +128,20 @@ where
     }
 
     /// Get all blocks as slice starting from a given block.
-    pub fn get_blocks_from(&self, start_block: &Block<T>) -> Result<&[Block<T>], Box<dyn error::Error>> {
-        Ok(&self.chain[start_block.get_index()..])
+    pub fn get_blocks_starting_at(&self, index: usize) -> Result<&[Block<T>], Box<dyn error::Error>> {
+        Ok(&self.chain[index..])
     }
 
     /// Add transaction to pending transactions
     pub fn add_transaction(&mut self, transaction: T) -> &mut Self {
-        self.transactions.push(transaction);
+        self.pending_transactions.push(transaction);
 
         self
     }
 
     /// Get pending transactions
-    pub fn get_pending_transactions(&self) -> &Vec<T> {
-        &self.transactions
+    pub fn get_pending_transactions(&self) -> &[T] {
+        &self.pending_transactions.as_slice()
     }
 
     /// Get `BlockChain`s uuid
@@ -178,6 +174,9 @@ impl Hashable for usize {
 fn test_blockchain_serde()  -> Result<(), Box<dyn error::Error>> {
     let mut blockchain = BlockChain::new(); // block #0 (genesis)
 
+    println!("{:?}", blockchain);
+    println!("{:?}", blockchain.get_block_last().hash());
+
     // crating block #1
     Transaction::new("s-1", "r-1", "message 1-1".to_string(), blockchain.borrow_mut());
     Transaction::new("s-2", "r-2", "message 2-2".to_string(), blockchain.borrow_mut());
@@ -209,7 +208,7 @@ fn test_blockchain_serde()  -> Result<(), Box<dyn error::Error>> {
 
     println!("{:?}", blockchain);
 
-    assert!(false);
+//    assert!(false);
     Ok(())
 }
 

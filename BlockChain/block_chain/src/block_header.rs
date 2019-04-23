@@ -12,7 +12,6 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use crate::hashable::{
     clone_into_array, convert_u32_to_u8_array, convert_u64_to_u8_array, HashSha256, Hashable,
 };
-use uuid::Uuid;
 use crate::Block;
 
 ////////////////////////////// Block Header ////////////////////////////
@@ -28,7 +27,6 @@ pub struct BlockHeader {
     pub nonce: usize,
     // https://sitano.github.io/merkle_light/merkle_light/index.html#modules
     //    merkle: BlockHash,    TODO: do it later if we have time for it
-    //    blockchain_uuid:
 }
 
 //#[allow(non_snake_case)]
@@ -47,7 +45,6 @@ impl BlockHeader {
                 .as_secs(),
             difficulty: 1usize,
             nonce: 0usize,
-//            blockchain_uuid: None
         }
     }
 
@@ -156,7 +153,6 @@ fn test_block_header_mutators() {
 
 #[test]
 fn test_block_header_hash() {
-    let hash = HashSha256::default();
     let mut header = BlockHeader::first();
     println!("{:?}", header);
 

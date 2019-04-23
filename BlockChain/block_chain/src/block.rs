@@ -7,6 +7,7 @@
 //! ToDo:
 //! - find better name for method `add_record`.
 //! - ?? hide `BlockHeader` ??
+//! - add blockchain uuid as parameter
 
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256, Sha512};
@@ -18,14 +19,15 @@ use crate::hashable::HashSha256;
 use crate::hashable::Hashable;
 use crate::transaction::Transaction;
 use core::borrow::BorrowMut;
+use uuid::Uuid;
 
 //////////////////////////////// Block ////////////////////////////
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct Block<T> {
+//    chain_uuid: Uuid,
     pub header: BlockHeader,
-    //    load: BlockLoad<Transaction<String>>,
-    load: Vec<T>,
+    pub load: Vec<T>,
 }
 
 #[allow(dead_code)]
@@ -33,9 +35,7 @@ impl<T> Block<T>
 where
     T: Hashable
 {
-    ///
     /// Creates new block
-    ///
     pub fn genesis() -> Self {
         Self {
             header: BlockHeader::first(),
@@ -43,9 +43,7 @@ where
         }
     }
 
-    ///
     /// Creates new block. Uses `self` as reference for block creation.
-    ///
     pub fn next(&self) -> Self {
         Self {
             header: self.header.next(self.hash()),
@@ -53,9 +51,7 @@ where
         }
     }
 
-    ///
     /// Adds single record to blocks load.
-    ///
     pub fn add_record(&mut self, record: T) -> &mut Self {
         self.load.push(record);
 

@@ -5,6 +5,8 @@
 //! # author: Mindaugas Sharskus
 //! # date: 31-03-2019
 //!
+//! ToDo:
+//! - append changes to file instead overwriting it each time blockchain is saved.
 
 
 pub mod config;
@@ -25,6 +27,7 @@ use block_chain::transaction::Transaction;
 use node::Node;
 use miner::Miner;
 use crate::config::Config;
+use core::borrow::Borrow;
 
 
 pub const CONFIG_FILE:&'static str = "settings_file.txt";
@@ -74,6 +77,16 @@ impl<'a> App<'a> {
         Ok(this)
     }
 
+    fn verify_config(config: &Config<'a>) -> Result<(), Box<dyn error::Error>>{
+        let app_configs = vec![
+            KEY_APP_USER,         // will be used as `sender` in message
+            KEY_MINER_URL,
+            KEY_BLOCKCHAIN_FILE,
+        ];
+
+        Ok(())
+    }
+
     pub fn save(&self) -> Result<(), Box<dyn error::Error>> {
         Ok(())
     }
@@ -82,32 +95,76 @@ impl<'a> App<'a> {
         self.node.connect()
     }
 
-    pub fn add_transaction(&mut self, transaction: Message) -> Result<(), Box<dyn error::Error>> {
-        self.blockchain.add_transaction(transaction);
+
+
+    /////////////////////////////// Messages /////////////////////////////////
+
+    /// Get pending messages.
+    pub fn get_pending_messages(&self) -> Option<&[Message]> {
+        let pending = self.blockchain.get_pending_transactions();
+
+        match pending.is_empty() {
+            false => Some(pending),
+            true => None
+        }
+    }
+
+    /// Add given message to the pending message list.
+    pub fn add_message(&mut self, message: Message) -> Result<(), Box<dyn error::Error>> {
+        self.blockchain.add_transaction(message);
 
         Ok(())
     }
 
-    pub fn get_pending_transactions(&self) -> Result<&Vec<Message>, Box<dyn error::Error>> {
-        Ok(self.blockchain.get_pending_transactions())
+    /// Get given user messages.
+    pub fn get_messages(&self, user: &str) -> Option<Vec<&Message>> {
+        // Collection where users messages will be stored
+        let mut messages= Vec::new();
+
+        // Iterate through each block
+        for block in &self.blockchain.chain {
+            // collect all user messages from the block.
+            let mut block_messages = block.load.iter()
+                .filter(|message| &message.sender == user || &message.receiver == user)
+                .collect::<Vec<_>>();
+            // move found messages
+            messages.append(&mut block_messages);
+        }
+
+        match messages.is_empty() {
+            true => None,
+            false => Some(messages)
+        }
     }
 
+
+
+    /////////////////////////////// Block /////////////////////////////////
+
+    /// Adds block to blockchain.
+    pub fn add_block(&mut self, block: Block<Message>) -> Result<(), Box<dyn error::Error>> {
+        self.blockchain.add_block(block).map(|_| ())
+    }
+
+    /// Generate new next block (for mining)
+    /// This `Block` needs to be mined before it can be added to `BlockChain`.
+    pub fn generate_next_block(&mut self) -> Block<Message> {
+        self.blockchain.generate_next_block()
+    }
+
+    /// Get genesis block.
     pub fn get_genesis_block(&self) -> Result<&Block<Message>, Box<dyn error::Error>> {
         Ok(self.blockchain.get_block_genesis())
     }
 
+    /// Get last block in the blockchain.
     pub fn get_last_block(&self) -> Result<&Block<Message>, Box<dyn error::Error>> {
         Ok(self.blockchain.get_block_last())
     }
 
-    pub fn add_block(&mut self, block: Block<Message>) -> Result<(), Box<dyn error::Error>> {
-        self.blockchain.add_block(block);
-
-        Ok(())
-    }
-
-    pub fn get_blocks_from(&self, block: &Block<Message>) -> Result<&[Block<Message>], Box<dyn error::Error>> {
-        self.blockchain.get_blocks_from(block)
+    /// Gets all blocks starting from the given one.
+    pub fn get_blocks_from(&self, index: usize) -> Result<&[Block<Message>], Box<dyn error::Error>> {
+        self.blockchain.get_blocks_starting_at(index)
     }
 
 
