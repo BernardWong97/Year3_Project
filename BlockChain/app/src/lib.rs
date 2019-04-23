@@ -14,6 +14,7 @@ use std::fs;
 use std::fmt;
 use std::io;
 use std::convert;
+use std::io::{Write, Read};
 
 use core::fmt::Display;
 
@@ -26,10 +27,11 @@ use miner::Miner;
 use crate::config::Config;
 
 
-const CONFIG_FILE:&'static str = "settings_file.txt";
+pub const CONFIG_FILE:&'static str = "settings_file.txt";
 
 pub const KEY_APP_USER:&'static str = "app_user";
 pub const KEY_MINER_URL:&'static str = "miners_url";
+pub const KEY_BLOCKCHAIN_FILE:&'static str = "blockchain_file";
 
 //////////////////////////// APP ///////////////////////////
 
@@ -41,7 +43,7 @@ pub struct App <'a>{
     /// - blockchain_file,
     /// - node_settings,
     pub config: Config<'a>,
-    blockchain: BlockChain<Transaction<String>>,
+    blockchain: BlockChain<Message>,
     node: Node<String>,
 //    miner: Miner<'a>,
 }
@@ -49,9 +51,23 @@ pub struct App <'a>{
 #[allow(dead_code)]
 impl<'a> App<'a> {
     pub fn create(config:Config<'a>) -> Result<Self, Box<dyn error::Error>> {
+        let uri = config.get_value(KEY_BLOCKCHAIN_FILE)
+            .ok_or("Blockchain backup file is not given")?;
+
+        let blockchain = match App::load_blockchain(uri){
+            Ok(chain) => {
+                println!("Loaded blockchain from: {}", uri);
+                chain
+            },
+            Err(err) => {
+                println!("Couldn't load from file. Creating new blockchain. \n\t[{}]", err);
+                BlockChain::new()
+            },
+        };
+
         let this = Self {
-            config: config,
-            blockchain: BlockChain::new(),
+            config,
+            blockchain,
             node: Node::new(),
         };
 
@@ -92,6 +108,35 @@ impl<'a> App<'a> {
 
     pub fn get_blocks_from(&self, block: &Block<Message>) -> Result<&[Block<Message>], Box<dyn error::Error>> {
         self.blockchain.get_blocks_from(block)
+    }
+
+
+
+    /////////////////////////////// Block /////////////////////////////////
+
+    /// Saves `BlockChain` to the file `KEY_BLOCKCHAIN_FILE`
+    pub fn save_blockchain(&self) -> Result<(), Box<dyn error::Error>> {
+        let path = self.config.get_value(KEY_BLOCKCHAIN_FILE).ok_or("Couldn't get path")?;
+        fs::File::create(path)?;
+
+        let mut file = fs::OpenOptions::new()
+            .append(false)
+            .write(true)
+            .open(path)?;
+
+        let serialized_chain = serde_json::to_string(&self.blockchain)?;
+        write!(file, "{}", serialized_chain)?;
+
+        Ok(())
+    }
+
+    /// Load `BlockChain` form file `KEY_BLOCKCHAIN_FILE`
+    pub fn load_blockchain(uri: &str) -> Result<BlockChain<Message>, Box<dyn error::Error>> {
+        let file = fs::File::open(uri)?;
+        let buffered = io::BufReader::new(file);
+        let deserialized: BlockChain<Message> = serde_json::from_reader(buffered)?;
+
+        Ok(deserialized)
     }
 
 

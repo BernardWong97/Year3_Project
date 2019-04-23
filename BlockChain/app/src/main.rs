@@ -152,6 +152,24 @@ fn get_hash(block_header: Json<BlockHeader>, app: State<Mutex<App>>) -> JsonValu
 
 
 
+////////////////////// Blockchain ////////////////////////////////
+
+#[get("/blockchain/<command>")]
+/// Control blockchain:
+/// - `"backup"` - saves blockchain to file
+/// - `"greeting"` - says "hi" (for testing)
+///
+/// ToDo:
+/// - ?? Control App ??
+fn blockchain_control(command: String, app: State<Mutex<App>>) -> Option<JsonValue> {
+    let app = app.lock().expect("Block: App Lock");
+
+    match command.as_str() {
+        "backup" => { app.save_blockchain(); Some(json!({"status":"ok"})) },
+        "greeting" => Some(json!({"status":"ok", "greeting":"Hi, from blockchain"})),
+        _ => Some(json!({"status":"err", "err":"unsupported command"}))
+    }
+}
 
 
 
