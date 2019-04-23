@@ -28,6 +28,8 @@ pub struct Config<'a>{
 impl <'a>Config<'a>{
     ///
     /// Creates new `AppConfig` from a given file.
+    /// ToDo:
+    /// - refactor
     ///
     pub fn from(settings_file: &'a str) -> Result<Self, Error>{
         let mut settings = collections::HashMap::new();
@@ -36,12 +38,15 @@ impl <'a>Config<'a>{
 
         for line in buffered.lines(){
             let value = line?;
-            let entry = value.split(':')
-                .map(|l| l.trim())
-                .collect::<Vec<_>>();
+            let semi_pos = value.chars().position(|ch| ch == ':').unwrap_or_else(||{
+                panic!("Semicolon not found");
+            });
 
-            if entry.len() > 2 { panic!(format!("more than 1 setting value is found {:#?}", entry)) }
-            settings.insert(entry[0].to_string(), entry[1].to_string());
+            let (key, value) = value.split_at(semi_pos);
+            settings.insert(
+                key.trim().to_string(),
+                value[1..].trim().to_string()
+            );
         }
 
         let this = Self{
