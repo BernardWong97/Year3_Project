@@ -167,3 +167,7 @@ Learning [Rocket](https://rocket.rs/). Implemented [API's](https://gitlab.com/My
 - Miner http API
 - Transaction http API
 - Block http API
+
+#### 23-04-2019
+Majoraty API is done.
+Merged controler branch to master.
