@@ -28,36 +28,8 @@ use crate::config::Config;
 
 const CONFIG_FILE:&'static str = "settings_file.txt";
 
-
-///////////// APP Error /////////////////////
-
-#[derive(Debug)]
-pub struct AppError{
-    err: String,
-}
-
-impl AppError {
-    pub fn new(err:String) -> Self {
-        Self{ err }
-    }
-}
-
-impl error::Error for AppError {
-}
-
-impl fmt::Display for AppError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Node error is here!")
-    }
-}
-
-impl convert::From<io::Error> for AppError {
-    fn from(er: io::Error) -> Self {
-        AppError::new(er.to_string())
-    }
-}
-
-
+pub const KEY_APP_USER:&'static str = "app_user";
+pub const KEY_MINER_URL:&'static str = "miners_url";
 
 //////////////////////////// APP ///////////////////////////
 
@@ -68,7 +40,7 @@ pub struct App <'a>{
     /// config:
     /// - blockchain_file,
     /// - node_settings,
-    app_config: Config<'a>,
+    pub config: Config<'a>,
     blockchain: BlockChain<Transaction<String>>,
     node: Node<String>,
 //    miner: Miner<'a>,
@@ -76,13 +48,9 @@ pub struct App <'a>{
 
 #[allow(dead_code)]
 impl<'a> App<'a> {
-    pub fn create(config:Config<'a>) -> Result<Self, AppError> {
-//        if let Ok(conf) = Config::from(CONFIG_FILE) {
-//
-//        }
-
+    pub fn create(config:Config<'a>) -> Result<Self, Box<dyn error::Error>> {
         let this = Self {
-            app_config: config,
+            config: config,
             blockchain: BlockChain::new(),
             node: Node::new(),
         };

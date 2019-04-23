@@ -31,7 +31,6 @@ use miner::Miner;
 ///
 #[post("/start", format = "application/json", data = "<block_header>")]
 fn get_hash(block_header: Json<BlockHeader>) -> JsonValue {
-
     let header:BlockHeader = block_header.0;
     let nonce = Miner::new(&header).start();
 

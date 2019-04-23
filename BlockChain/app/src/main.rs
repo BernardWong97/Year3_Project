@@ -14,21 +14,28 @@
 #[macro_use] extern crate rocket;
 #[macro_use] extern crate rocket_contrib;
 #[macro_use] extern crate serde_derive;
+extern crate reqwest;
+use reqwest::Client;
 
 use rocket::{Request, Rocket, response::content, data::Data, State};
 use rocket_contrib::json::{JsonValue, Json};
+use rocket::config::{Environment};
 
+use std::error;
 use std::io::Read;
 use std::sync::Mutex;
 use std::fs;
 use std::env::join_paths;
 
-use app::{App, AppError};
+use app::{App};
 use app::config::Config;
 use app::Message;
 use block_chain::hashable::Hashable;
 use block_chain::transaction::Transaction;
 use block_chain::Block;
+use block_chain::block_header::BlockHeader;
+use miner::Miner;
+use std::ptr::read;
 
 
 /// App settings file
@@ -124,6 +131,30 @@ fn get_last_block(app: State<Mutex<App>>) -> JsonValue {
     }
 }
 
+
+
+////////////////////// Miner ////////////////////////////////
+
+#[post("/miner", format = "application/json", data = "<block_header>")]
+fn get_hash(block_header: Json<BlockHeader>, app: State<Mutex<App>>) -> JsonValue {
+    let mut app = app.lock().expect("Block: App Lock");
+    let header:BlockHeader = block_header.0;
+
+    // todo: fix unwrap()
+    let mut miners_url = app.config.get_value(app::KEY_MINER_URL).unwrap().as_str();
+
+    Client::new()
+        .post(miners_url)
+        .json(&header)
+        .send().unwrap()    // todo: fix unwrap()
+        .json().unwrap()    // todo: fix unwrap()
+}
+
+
+
+
+
+
 ///
 /// Says hello.
 ///
@@ -135,7 +166,7 @@ fn world() -> &'static str {
 ///
 /// builds "Rocket"
 ///
-fn rocket() -> Result<Rocket, AppError> {
+fn rocket() -> Result<Rocket, Box<dyn error::Error>> {
     let config = match Config::from(CONFIG_FILE){
         Ok(content) => content,
         // ToDo: fix this ugliness
@@ -145,11 +176,16 @@ fn rocket() -> Result<Rocket, AppError> {
         }
     };
     let app = App::create(config)?;
-    let rocket = rocket::ignite()
+    let config = rocket::config::Config::build(Environment::Staging)
+        .port(8001)
+        .finalize()?;
+
+    let rocket = rocket::custom(config)
         .mount("/app", routes![
             world,
             add_transaction, get_transactions,
-            add_blocks, get_blocks_starting, get_genesis_block, get_last_block
+            add_blocks, get_blocks_starting, get_genesis_block, get_last_block,
+            get_hash,
     ])
         .manage(Mutex::new(app));
 
@@ -159,7 +195,7 @@ fn rocket() -> Result<Rocket, AppError> {
 ///
 /// Launches "Rocket"
 ///
-fn main() -> Result<(), AppError> {
+fn main() -> Result<(), Box<dyn error::Error>> {
     let rocket:Rocket = rocket()?;
     rocket.launch();
 
