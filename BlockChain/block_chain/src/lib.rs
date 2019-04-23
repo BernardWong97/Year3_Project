@@ -30,6 +30,7 @@ use crate::hashable::HashSha256;
 use crate::hashable::Hashable;
 use crate::transaction::Transaction;
 use core::borrow::BorrowMut;
+use std::fmt::Debug;
 
 //////////////////////////////// Block Chain ////////////////////////////
 
@@ -43,7 +44,7 @@ pub struct BlockChain<T> {
 #[allow(dead_code)]
 impl<T> BlockChain<T>
 where
-    T: Hashable, // Transaction<String>
+    T: Hashable + Debug, // Transaction<String>
 {
     ///
     /// Creates new `BlockChain` with genesis block in it
@@ -62,23 +63,19 @@ where
     ///
     /// Creates new "next" block.
     /// New block will have all pending transactions.
-    /// TODO:
-    /// - rewrite it
-    /// - ??? Rename to `generate_new_block ???
     ///
-    pub fn create_next_block(&mut self) -> &Block<T> {
-        let mut new_block = self
-            .chain
-            .last()     // TODO: check if element is removed from DB
+    pub fn generate_next_block(&mut self) -> Block<T> {
+        /// create temp next block using the last block.
+        let mut new_block = self.chain
+            .last()
             .unwrap_or_else(|| {
                 panic!("Here is no blocks in blockchain");
             })
             .next(); // create new "next" block
 
-        // add all pending transactions to new block //
-
         // https://doc.rust-lang.org/error-index.html#E0507
         // second part(close to end)
+        /// Move all pending transactions to newly created block
         mem::replace(&mut self.transactions, Vec::new())
             .into_iter()
             .for_each(|tr| {
@@ -87,14 +84,9 @@ where
 
         assert_eq!(self.transactions.len(), 0);
 
-        // add new block to blockchain
-        self.chain.push(new_block);
 
-        // return blockchain last block reference
-        &self
-            .chain
-            .last()
-            .unwrap_or_else(|| panic!("Here is no blocks in blockchain"))
+        /// New next block holding all pending transactions
+        new_block
     }
 
     ///
@@ -183,18 +175,24 @@ impl Hashable for usize {
 //////////////////////////////// Tests /////////////////////////////////////////////////
 
 #[test]
-fn test_blockchain_serde() {
+fn test_blockchain_serde()  -> Result<(), Box<dyn error::Error>> {
     let mut blockchain = BlockChain::new(); // block #0 (genesis)
 
     // crating block #1
     Transaction::new("s-1", "r-1", "message 1-1".to_string(), blockchain.borrow_mut());
     Transaction::new("s-2", "r-2", "message 2-2".to_string(), blockchain.borrow_mut());
-    blockchain.create_next_block();
+    let block = blockchain.generate_next_block();
+    blockchain.add_block(block)?;
+
+    println!("{:?}", blockchain);
 
     // creating block #2
     Transaction::new("s-1", "r-2", "message 1-2".to_string(), blockchain.borrow_mut());
     Transaction::new("s-2", "r-1", "message 2-1".to_string(), blockchain.borrow_mut());
-    blockchain.create_next_block();
+    let block = blockchain.generate_next_block();
+    blockchain.add_block(block)?;
+
+    println!("{:?}", blockchain);
 
     // Convert the Block to a JSON string.
     let serialized = serde_json::to_string(&blockchain).unwrap();
@@ -211,7 +209,8 @@ fn test_blockchain_serde() {
 
     println!("{:?}", blockchain);
 
-//    assert!(false);
+    assert!(false);
+    Ok(())
 }
 
 //////////////////////////////// Tests ////////////////////////////

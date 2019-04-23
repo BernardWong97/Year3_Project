@@ -48,7 +48,7 @@ where
     ///
     pub fn next(&self) -> Self {
         Self {
-            header: self.header.next(),
+            header: self.header.next(self.hash()),
             load: Vec::new(),
         }
     }

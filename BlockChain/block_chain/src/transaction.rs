@@ -21,6 +21,7 @@ use crate::hashable::Hashable;
 use crate::block_header::BlockHeader;
 use crate::{Block, BlockChain};
 use core::borrow::BorrowMut;
+use std::fmt::Debug;
 
 //////////////////////////////// Transaction ///////////////////////////
 
@@ -43,7 +44,7 @@ pub struct Transaction<T> {
 #[allow(dead_code)]
 impl<T> Transaction<T>
 where
-    T: Hashable,
+    T: Hashable + Debug,
 {
     pub fn new(sender: &str, receiver: &str, load: T, blockchain: &mut BlockChain<Transaction<T>>) {
         // create transaction
