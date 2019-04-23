@@ -1,3 +1,10 @@
+//!
+//! `BlockHeader` is here to reduce `Block` fields overcrowding.
+//!
+//! # author: Mindaugas Sharskus
+//! # date: 15-02-2019
+//!
+
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256, Sha512};
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -5,6 +12,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use crate::hashable::{
     clone_into_array, convert_u32_to_u8_array, convert_u64_to_u8_array, HashSha256, Hashable,
 };
+use crate::Block;
 
 ////////////////////////////// Block Header ////////////////////////////
 
@@ -12,14 +20,13 @@ use crate::hashable::{
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq)]
 pub struct BlockHeader {
     // More at: https://bitcoin.stackexchange.com/a/7332
-    index: u32,
-    prev_hash: HashSha256,
+    pub index: usize,
+    prev_block_hash: HashSha256,
     time_stamp: u64,
     pub difficulty: usize,
     pub nonce: usize,
     // https://sitano.github.io/merkle_light/merkle_light/index.html#modules
     //    merkle: BlockHash,    TODO: do it later if we have time for it
-    //    blockchain_uuid:
 }
 
 //#[allow(non_snake_case)]
@@ -30,8 +37,8 @@ impl BlockHeader {
     ///
     pub fn first() -> Self {
         Self {
-            index: 0u32,
-            prev_hash: HashSha256::default(),
+            index: 0usize,
+            prev_block_hash: HashSha256::default(),
             time_stamp: SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .unwrap_or_default()
@@ -49,14 +56,15 @@ impl BlockHeader {
     ///     - prev_hash: set to current(self) block headers hash
     ///     - .. all rest same as current block header
     ///
-    pub fn next(&self) -> Self {
+    pub fn next(&self, prev_block_hash: HashSha256) -> Self {
         Self {
             index: self.index + 1,
-            prev_hash: self.hash(),
+            prev_block_hash,
             time_stamp: SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .unwrap_or_default()
                 .as_secs(),
+            nonce:0usize,
             ..self.clone()
         }
     }
@@ -87,14 +95,19 @@ impl BlockHeader {
 
         self
     }
+
+    /// Get previous block hash
+    pub fn get_previous_hash(&self) -> &HashSha256 {
+        &self.prev_block_hash
+    }
 }
 
 impl Hashable for BlockHeader {
     fn hash(&self) -> HashSha256 {
         let mut hasher = Sha256::new();
-        hasher.input(convert_u32_to_u8_array(self.index));
+        hasher.input(convert_u64_to_u8_array(self.index as u64));
         hasher.input(convert_u64_to_u8_array(self.difficulty as u64));
-        hasher.input(self.prev_hash);
+        hasher.input(self.prev_block_hash);
         hasher.input(convert_u64_to_u8_array(self.time_stamp));
         hasher.input(convert_u64_to_u8_array(self.nonce as u64));
 
@@ -117,10 +130,10 @@ fn test_block_header_serde() {
     println!("deserialized = {:?}", deserialized);
 
     assert_eq!(deserialized.index, header.index);
-    assert_eq!(deserialized.prev_hash, header.prev_hash);
+    assert_eq!(deserialized.prev_block_hash, header.prev_block_hash);
     assert_eq!(deserialized.time_stamp, header.time_stamp);
 
-    //    assert!(false);
+        assert!(false);
 }
 
 #[test]
@@ -133,7 +146,7 @@ fn test_block_header_mutators() {
     assert_eq!(header.index, 0);
     assert_eq!(header.nonce, 6);
     assert_eq!(header.difficulty, 5);
-    assert_eq!(header.prev_hash, [0; 32]);
+    assert_eq!(header.prev_block_hash, [0; 32]);
 
     //    assert!(false);
 }
@@ -151,8 +164,8 @@ fn test_block_header_hash() {
 
     assert_ne!(hash, hash1);
 
-    let header1 = header.next();
-    let header2 = header1.next();
+    let header1 = header.next(hash);
+    let header2 = header1.next(hash);
     println!("{:?}", header1);
     println!("{:?}", header1.hash());
     println!("{:?}", header2);

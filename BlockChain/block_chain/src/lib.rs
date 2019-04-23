@@ -1,109 +1,152 @@
-//#![allow(non_snake_case)]
+//! Block submodule
+//!
+//! # author: Mindaugas Sharskus
+//! # date: 15-02-2019
+//!
+//! TODO (improvements):
+//! - ?? Implement merkle tree functionality fo transaction confirmation.
+//! - ?? Create `BlockChainError` to handle `BlockChain` errors.
+//! - hide public fields
+
+
 #![allow(unused_imports)]
 
 mod block;
-/// Block submodule
-///
-/// # author: Mindaugas Sharskus
-/// # date: 15-20-2019
-///
 pub mod block_header;
-pub mod db;
 pub mod hashable;
-pub mod message;
 pub mod transaction;
 
 use serde::{Deserialize, Serialize, Serializer};
 use sha2::{Digest, Sha256, Sha512};
 use std::convert::AsMut;
-use std::mem;
+use std::{mem, error};
 use uuid::Uuid;
 
 pub use crate::block::Block;
-use crate::db::ChainDB;
-use crate::db::DB;
 use crate::hashable::clone_into_array;
 use crate::hashable::convert_u64_to_u8_array;
 use crate::hashable::HashSha256;
 use crate::hashable::Hashable;
 use crate::transaction::Transaction;
+use core::borrow::BorrowMut;
+use std::fmt::Debug;
 
 //////////////////////////////// Block Chain ////////////////////////////
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct BlockChain<T> {
     uuid: Uuid,
-    //    chain: Vec<Block<T>>,
-    chain: ChainDB<Block<T>>,
-
-    transactions: Vec<T>, // pending transactions
+    pub chain: Vec<Block<T>>,
+    pub pending_transactions: Vec<T>, // pending transactions
 }
 
 #[allow(dead_code)]
 impl<T> BlockChain<T>
 where
-    T: Hashable + Default,
+    T: Hashable + Debug, // Transaction<String>
 {
-    // TODO: Implement merkle tree functionality fo transaction confirmation.
     ///
-    /// Creates new blockchain with genesis block in it
+    /// Creates new `BlockChain` with genesis block in it
     ///
     pub fn new() -> Self {
-        //        let mut chain = Vec::new();     // create chain
-        //        chain.push(Block::genesis());        // add genesis block to chain
-        let mut chain = ChainDB::new();
-        chain.push(Block::genesis());
+        let mut chain = Vec::new();     // create chain
+        chain.push(Block::genesis());        // add genesis block to chain
 
         Self {
             uuid: Uuid::new_v4(),
             chain,
-            transactions: Vec::new(),
+            pending_transactions: Vec::new(),
         }
     }
 
     ///
     /// Creates new "next" block.
     /// New block will have all pending transactions.
-    /// TODO: rewrite it
     ///
-    pub fn create_next_block(&mut self) -> &Block<T> {
-        let mut new_block = self
-            .chain
-            .last()     // TODO: check if element is removed from DB
+    pub fn generate_next_block(&mut self) -> Block<T> {
+        // create temp next block using the last block.
+        let mut new_block = self.chain
+            .last()
             .unwrap_or_else(|| {
                 panic!("Here is no blocks in blockchain");
             })
             .next(); // create new "next" block
 
-        // add all pending transactions to new block //
-
         // https://doc.rust-lang.org/error-index.html#E0507
         // second part(close to end)
-        mem::replace(&mut self.transactions, Vec::new())
+        // Move all pending transactions to newly created block
+        mem::replace(&mut self.pending_transactions, Vec::new())
             .into_iter()
             .for_each(|tr| {
                 new_block.add_record(tr);
             });
 
-        assert_eq!(self.transactions.len(), 0);
-
-        // add new block to blockchain
-        self.chain.push(new_block);
-
-        // return blockchain last block reference
-        &self
-            .chain
-            .last()
-            .unwrap_or_else(|| panic!("Here is no blocks in blockchain"))
+        // New next block holding all pending transactions
+        new_block
     }
 
     ///
-    /// Add transaction to pending transactions
+    /// Verify and add given `Block` to the `BlockChain`.
+    /// ToDo:
+    /// - check if block belongs to our `BlockChain`
+    /// - check timestamp continuity
     ///
+    pub fn add_block(&mut self, block: Block<T>) -> Result<&mut Self, Box<dyn error::Error>> {
+        // Borrow last `Block` from `BlockChain`.
+        let last_block = self.chain.last().unwrap_or_else(||{
+            panic!("BlockChain fatal error! No blocks found.")
+        });
+
+        // Check for hash continuity
+        if block.get_prev_hash() != &last_block.hash() {
+            // If we here it's mean we are out of sync
+            // or someone trying to mess with blockchain.
+            panic!("Given block can't be added to current blockchain. Hash mismatch.");
+        }
+
+        // Check for index continuity
+        if block.get_index() -1 != last_block.get_index() {
+            panic!("Given block can't be added to current blockchain. Index mismatch.");
+        }
+
+        // If all verification passes without errors: add the block.
+        self.chain.push(block);
+
+        Ok(self)
+    }
+
+    /// Get `BlockChain` genesis `Block`
+    pub fn get_block_genesis(&self) -> &Block<T> {
+        &self.chain[0]
+    }
+
+    /// Get `BlockChain` last `Block`
+    pub fn get_block_last(&self) -> &Block<T> {
+        &self.chain.last().unwrap_or_else(||{
+            panic!("BlockChain fatal error! No blocks found.")
+        })
+    }
+
+    /// Get all blocks as slice starting from a given block.
+    pub fn get_blocks_starting_at(&self, index: usize) -> Result<&[Block<T>], Box<dyn error::Error>> {
+        Ok(&self.chain[index..])
+    }
+
+    /// Add transaction to pending transactions
     pub fn add_transaction(&mut self, transaction: T) -> &mut Self {
-        self.transactions.push(transaction);
+        self.pending_transactions.push(transaction);
 
         self
+    }
+
+    /// Get pending transactions
+    pub fn get_pending_transactions(&self) -> &[T] {
+        &self.pending_transactions.as_slice()
+    }
+
+    /// Get `BlockChain`s uuid
+    pub fn get_uuid(&self) -> &Uuid {
+        &self.uuid
     }
 }
 
@@ -128,63 +171,45 @@ impl Hashable for usize {
 //////////////////////////////// Tests /////////////////////////////////////////////////
 
 #[test]
-fn test_blockchain_serde() {
+fn test_blockchain_serde()  -> Result<(), Box<dyn error::Error>> {
     let mut blockchain = BlockChain::new(); // block #0 (genesis)
 
+    println!("{:?}", blockchain);
+    println!("{:?}", blockchain.get_block_last().hash());
+
     // crating block #1
-    let mut transaction: Transaction<String, usize> = Transaction::default();
-    transaction
-        .add_sender(String::from("s1"))
-        .add_receiver(String::from("r1"))
-        .add_value(1usize)
-        .add_load(String::from("load 1"));
-    blockchain.add_transaction(transaction);
+    Transaction::new("s-1", "r-1", "message 1-1".to_string(), blockchain.borrow_mut());
+    Transaction::new("s-2", "r-2", "message 2-2".to_string(), blockchain.borrow_mut());
+    let block = blockchain.generate_next_block();
+    blockchain.add_block(block)?;
 
-    let mut transaction: Transaction<String, usize> = Transaction::default(); // shadowing variable
-    transaction
-        .add_sender(String::from("s2"))
-        .add_receiver(String::from("r2"))
-        .add_value(2usize)
-        .add_load(String::from("load 2"));
-    blockchain.add_transaction(transaction);
-
-    blockchain.create_next_block();
+    println!("{:?}", blockchain);
 
     // creating block #2
-    let mut transaction: Transaction<String, usize> = Transaction::default();
-    transaction
-        .add_sender(String::from("s11"))
-        .add_receiver(String::from("r11"))
-        .add_value(11usize)
-        .add_load(String::from("load 11"));
-    blockchain.add_transaction(transaction);
+    Transaction::new("s-1", "r-2", "message 1-2".to_string(), blockchain.borrow_mut());
+    Transaction::new("s-2", "r-1", "message 2-1".to_string(), blockchain.borrow_mut());
+    let block = blockchain.generate_next_block();
+    blockchain.add_block(block)?;
 
-    let mut transaction: Transaction<String, usize> = Transaction::default(); // shadowing variable
-    transaction
-        .add_sender(String::from("s12"))
-        .add_receiver(String::from("r12"))
-        .add_value(12usize)
-        .add_load(String::from("load 12"));
-    blockchain.add_transaction(transaction);
-
-    blockchain.create_next_block();
+    println!("{:?}", blockchain);
 
     // Convert the Block to a JSON string.
     let serialized = serde_json::to_string(&blockchain).unwrap();
     println!("serialized = {}", serialized);
 
     // Convert the JSON string back to a Block.
-    let deserialized: BlockChain<Transaction<String, usize>> =
+    let deserialized: BlockChain<Transaction<String>> =
         serde_json::from_str(&serialized).unwrap();
     println!("deserialized = {:?}", deserialized);
 
-    assert_eq!(deserialized.chain.size(), blockchain.chain.size());
-//        assert_eq!(deserialized.chain[1], blockchain.chain[1]);
-//        assert_ne!(deserialized.chain[0], blockchain.chain[1]);
+//    assert_eq!(deserialized.chain.size(), blockchain.chain.size());
+        assert_eq!(deserialized.chain[1], blockchain.chain[1]);
+        assert_ne!(deserialized.chain[0], blockchain.chain[1]);
 
     println!("{:?}", blockchain);
 
-    assert!(false);
+//    assert!(false);
+    Ok(())
 }
 
 //////////////////////////////// Tests ////////////////////////////

@@ -18,7 +18,7 @@ use block_chain::hashable;
 use std::thread::JoinHandle;
 
 #[derive(Debug)]
-struct Miner<'a>{
+pub struct Miner<'a>{
     header: &'a BlockHeader,
 }
 
