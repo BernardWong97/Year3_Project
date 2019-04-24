@@ -145,17 +145,25 @@ mod tests {
     fn it_works() {
 
         let node_server: Node<String> = Node::new();
-        let node_client: Node<String> = Node::new();
         let mut children = Vec::new();
+        static NETWORK: [&str; 2] = ["192.168.70.1", "192.168.70.129"];
 
         children.push(thread::spawn(move || {
             node_server.server();
         }));
 
-//    children.push(thread::spawn(move || {
-//        thread::sleep(Duration::from_millis(100));
-//        node_client.connect("10.12.10.25");
-//    }));
+        for node_server in NETWORK.iter() {
+            let node_client: Node<String> = Node::new();
+            children.push(thread::spawn(move || {
+                thread::sleep(Duration::from_millis(100));
+                node_client.ping_server(node_server);
+            }));
+        } // for
+
+//        children.push(thread::spawn(move || {
+//            thread::sleep(Duration::from_millis(100));
+//            node_client.connect();
+//        }));
 
         // collect each thread's result
         for child in children {
