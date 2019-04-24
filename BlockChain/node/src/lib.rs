@@ -27,9 +27,8 @@ impl<T> Node <T> {
     }
 
     ///
-    /// Connect node to the net.
+    /// Send the message to the ip's machine socket
     ///
-    /// ..Probably we need to pass addresses were to connect..
     pub fn send_message(&self, ip_address: &'static str, message: String) {
         let self_local_ip = local_ip::get().unwrap().to_string();
 
@@ -49,8 +48,11 @@ impl<T> Node <T> {
                 }
             } // match
         } // if
-    } // connect()
+    } // send_message()
 
+    ///
+    /// Check the connectivity of the ip's machine server node
+    ///
     pub fn ping_server(&self, ip_address: &'static str) {
         let self_local_ip = local_ip::get().unwrap().to_string();
 
@@ -87,6 +89,9 @@ impl<T> Node <T> {
         } // if
     } // ping_server()
 
+    ///
+    /// The server initialization function
+    ///
     pub fn server(&self) {
         let listener = TcpListener::bind("0.0.0.0:6000").unwrap();
         // accept connections and process them, spawning a new thread for each one
@@ -111,7 +116,7 @@ impl<T> Node <T> {
                                 stream.shutdown(Shutdown::Both).unwrap();
                                 false
                             }
-                        }
+                        } // match
                     });
                 }
                 Err(e) => {
@@ -123,46 +128,34 @@ impl<T> Node <T> {
         drop(listener);
     } // server()
 
-    //// get network status
-  //  pub fn get_status(&self) -> Result<String, Error> { // ??custom error, response
- //       let status: bool = true; // check status
-      //  if status {
-       //     Ok(String::from("All good!"))
-       // }
-        //else {
-           // Err("Oh no!")
-        //}
-    //}
-
-    ////
-    //// Get message
-    ////
-    //pub fn get_message(&mut self) -> Option<T> {
-        //self.in_buffer.pop_front()?
-    //}
-
-//    ///
-//    /// Send message
-//    ///
-//    pub fn send_message(&mut self, message: T) -> Result<(), Error> {  // ?? add error if buffer is full
-//        self.out_buffer.push_back(message)
-//
-//
-//    }
-
-    // ??... other methods.. ??
-
-}
+} // impl Node
 
 
 
 #[cfg(test)]
 mod tests {
     use crate::Node;
+    use std::thread;
+    use std::time::Duration;
 
     #[test]
     fn it_works() {
-        let node: Node<String> = Node::new();
-        assert!(true, node.connect("192.168.71.1"))
+        let node_server: Node<String> = Node::new();
+        let node_client: Node<String> = Node::new();
+        let mut children = Vec::new();
+
+        children.push(thread::spawn(move || {
+            node_server.server();
+        }));
+
+//    children.push(thread::spawn(move || {
+//        thread::sleep(Duration::from_millis(100));
+//        node_client.connect("10.12.10.25");
+//    }));
+
+        // collect each thread's result
+        for child in children {
+            child.join().expect("Failed to join threads");
+        } // for
     }
 }
