@@ -3,19 +3,16 @@
 //!
 extern crate eventual;
 
-use std::collections::VecDeque;
-use std::error::Error;
 use std::net::{TcpListener, TcpStream, Shutdown};
 use std::thread;
 use eventual::Timer;
 use std::io::{Write, Read};
+use std::str::from_utf8;
 
-const MSG_SIZE: usize = 32;
-
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub struct Node<T> {    // T for messages type. Can be a simple as string or custom struct
-    in_buffer: T,     // https://doc.rust-lang.org/std/collections/struct.VecDeque.html
-    out_buffer: T,
+    in_buffer: Vec<T>,     // https://doc.rust-lang.org/std/collections/struct.VecDeque.html
+    out_buffer: Vec<T>,
     // ... more ??
 }
 
@@ -23,10 +20,10 @@ impl<T> Node <T> {
     ///
     /// Create new node
     ///
-    pub fn new(in_buf: T, out_buf: T) -> Self {
+    pub fn new() -> Self {
         Self {
-            in_buffer: in_buf,
-            out_buffer: out_buf,
+            in_buffer: Vec::new(),
+            out_buffer: Vec::new(),
         }
     }
 
@@ -42,17 +39,14 @@ impl<T> Node <T> {
             Ok(mut stream) => {
                 println!("Successfully connected to {}", ip_address);
 
-                let msg = b"keep alive";
+                //let msg = b"keep alive";
 
-                let timer = Timer::new();
-                let ticks = timer.interval_ms(1000).iter();
+                self.close_connection(stream);
 
-                for _ in ticks {
-                    stream.write(msg).unwrap();
-                }
+                //stream.write(msg).unwrap();
 
             },
-            Err(e) => {
+            Err(_e) => {
                 println!("Failed to connect to {}", ip_address);
             }
         } // match
@@ -71,9 +65,8 @@ impl<T> Node <T> {
                         let mut data = [0 as u8; 50];
 
                         while match stream.read(&mut data) {
-                            Ok(size) => {
-                                // echo everything!
-                                print!("{:?}",&data[0..size]);
+                            Ok(_) => {
+                                println!("{}", from_utf8(&data).unwrap());
                                 true
                             },
                             Err(_) => {
@@ -93,6 +86,10 @@ impl<T> Node <T> {
         // close the socket server
         drop(listener);
     } // server()
+
+    fn close_connection(&self, stream: TcpStream){
+        stream.shutdown(Shutdown::Both);
+    }
 
     //// get network status
   //  pub fn get_status(&self) -> Result<String, Error> { // ??custom error, response

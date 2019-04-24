@@ -1,16 +1,19 @@
 use node::Node;
 use std::thread;
+use std::time::Duration;
 
 fn main(){
-    let node: Node<String> = Node::new("".to_owned(), "".to_owned());
-    let mut children = vec![];
+    let node_server: Node<String> = Node::new();
+    let node_client: Node<String> = Node::new();
+    let mut children = Vec::new();
 
     children.push(thread::spawn(move || {
-        node.server();
+        node_server.server();
     }));
 
     children.push(thread::spawn(move || {
-        node.connect("192.168.70.1");
+        thread::sleep(Duration::from_millis(100));
+        node_client.connect("10.12.10.25");
     }));
 
     // collect each thread's result
