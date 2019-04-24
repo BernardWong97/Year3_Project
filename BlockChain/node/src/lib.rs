@@ -100,8 +100,10 @@ impl<T> Node <T> {
 
                         match stream.read(&mut data) {
                             Ok(size) => {
-                                stream.write(&data[0..size]).unwrap();
-                                println!("Pinged from {}", stream.peer_addr().unwrap().ip());
+                                if from_utf8(&data[0..size]).unwrap() == "ping"{
+                                    stream.write(&data[0..size]).unwrap();
+                                    println!("Pinged from {}", stream.peer_addr().unwrap().ip());
+                                } // if
                                 true
                             },
                             Err(_) => {
