@@ -105,10 +105,13 @@ impl<T> Node <T> {
 
                         match stream.read(&mut data) {
                             Ok(size) => {
-                                if from_utf8(&data[0..size]).unwrap() == "ping"{
+                                let recv_data = from_utf8(&data[0..size]).unwrap();
+                                if recv_data == "ping"{
                                     stream.write(&data[0..size]).unwrap();
                                     println!("Pinged from {}", stream.peer_addr().unwrap().ip());
-                                } // if
+                                } else {
+                                    println!("Data received from {}: {}", stream.peer_addr().unwrap().ip(), recv_data);
+                                } // if.else
                                 true
                             },
                             Err(_) => {
@@ -140,6 +143,7 @@ mod tests {
 
     #[test]
     fn it_works() {
+
         let node_server: Node<String> = Node::new();
         let node_client: Node<String> = Node::new();
         let mut children = Vec::new();
