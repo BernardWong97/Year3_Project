@@ -11,10 +11,10 @@ fn main(){
         node_server.server();
     }));
 
-    children.push(thread::spawn(move || {
-        thread::sleep(Duration::from_millis(100));
-        node_client.connect("10.12.10.25");
-    }));
+//    children.push(thread::spawn(move || {
+//        thread::sleep(Duration::from_millis(100));
+//        node_client.connect("10.12.10.25");
+//    }));
 
     // collect each thread's result
     for child in children {
