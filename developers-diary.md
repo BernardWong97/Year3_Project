@@ -169,5 +169,11 @@ Learning [Rocket](https://rocket.rs/). Implemented [API's](https://gitlab.com/My
 - Block http API
 
 #### 23-04-2019
-Majoraty API is done.
-Merged controler branch to master.
+Majority API is done.  
+Merged controller branch to master.  
+Found out mpsc crate is not suitable for this project for sending data through socket.
+Found an issue of the crate that it cannot send single string but need to wrap in a infinite loop to compensate the infinite listening.
+
+#### 24-04-2019
+Changes from mpsc channelling to TCP stream channelling.  
+Study on how to [send JSON over websockets](https://thomask.sdf.org/blog/2017/07/02/sending-json-over-websockets-in-rust.html)
