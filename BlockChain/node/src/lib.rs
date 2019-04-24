@@ -58,7 +58,6 @@ impl<T> Node <T> {
 
         // if ip match self ip
         if self_local_ip != ip_address{
-            println!("Trying to connect {}...", ip_address);
             let ip_port = format!("{}:{}", ip_address, "6000"); // combine ip address and port
 
             match TcpStream::connect(ip_port) {
@@ -146,24 +145,20 @@ mod tests {
 
         let node_server: Node<String> = Node::new();
         let mut children = Vec::new();
-        static NETWORK: [&str; 2] = ["192.168.70.1", "192.168.70.129"];
+        static NETWORK: [&str; 3] = ["192.168.70.1", "192.168.70.129", "192.168.70.130"];
 
         children.push(thread::spawn(move || {
             node_server.server();
         }));
 
-        for node_server in NETWORK.iter() {
+        for node_ip in NETWORK.iter() {
             let node_client: Node<String> = Node::new();
             children.push(thread::spawn(move || {
                 thread::sleep(Duration::from_millis(100));
-                node_client.ping_server(node_server);
+                // node_client.ping_server(node_server);
+                node_client.send_message(node_ip, String::from("This is the message from host1"));
             }));
         } // for
-
-//        children.push(thread::spawn(move || {
-//            thread::sleep(Duration::from_millis(100));
-//            node_client.connect();
-//        }));
 
         // collect each thread's result
         for child in children {
