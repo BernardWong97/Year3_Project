@@ -35,10 +35,24 @@ pub const CONFIG_FILE:&'static str = "settings_file.txt";
 pub const KEY_APP_USER:&'static str = "app_user";
 pub const KEY_MINER_URL:&'static str = "miners_url";
 pub const KEY_BLOCKCHAIN_FILE:&'static str = "blockchain_file";
+pub const BLOCK_REWARD: usize = 20;
+pub const MESSAGE_RECEIVE_REWARD: usize = 2usize;
+pub const MESSAGE_SEND_COST: usize = 7usize;
 
 //////////////////////////// APP ///////////////////////////
 
 pub type Message = Transaction<String>;
+
+#[derive(Serialize, Debug)]
+pub struct AppInfo<'i> {
+    username: &'i str,
+    user_balance: usize,  // balance only whole numbers (no fractions)
+    blockchain_uuid: &'i Uuid,
+    chain_len: usize,
+    block_reward: usize,
+    message_read_reward: usize,
+    message_send_cost: usize,
+}
 
 //#[derive(Serialize, Deserialize, Debug)]
 pub struct App <'a>{
@@ -95,6 +109,53 @@ impl<'a> App<'a> {
         self.node.connect()
     }
 
+
+    /////////////////////////////// App /////////////////////////////////
+
+
+
+    pub fn get_app_info(&self) -> Result<AppInfo, Box<dyn Error>> {
+        let username = self.config.get_value(KEY_APP_USER)
+            .ok_or(AppError::new("Can not get username"))?;
+
+        let blockchain_uuid = self.blockchain.get_uuid();
+
+        let user_messages = self.get_messages(username)
+            .ok_or(AppError::from("User have no funds"))?;
+
+        let block_rewards = user_messages.iter()
+            .filter(|msg| {
+                let sender = Uuid::parse_str(msg.sender.as_str());
+                sender.is_ok() && &sender.unwrap() == blockchain_uuid
+            })
+            .map(|_| BLOCK_REWARD)
+            .sum::<usize>();
+
+        let message_rewards = user_messages.iter()
+            .filter(|msg| &msg.receiver == username)
+            .map(|_| MESSAGE_RECEIVE_REWARD)
+            .sum::<usize>();
+
+        let messages_costs = user_messages.iter()
+            .filter(|msg| &msg.sender == username)
+            .map(|_| MESSAGE_SEND_COST)
+            .sum::<usize>();
+
+        println!("b:{}, mr{}, mc{}", block_rewards, message_rewards, messages_costs);
+
+        let user_balance = (block_rewards + message_rewards) - messages_costs;
+
+
+        Ok(AppInfo{
+            username,
+            user_balance,
+            blockchain_uuid,
+            chain_len: 0,
+            block_reward: 0,
+            message_read_reward: 0,
+            message_send_cost: 0
+        })
+    }
 
 
     /////////////////////////////// Messages /////////////////////////////////
