@@ -1,97 +1,168 @@
 //!
 //! Node library responsible for network communications
 //!
+extern crate local_ip;
 
-use std::collections::VecDeque;
-use std::error::Error;
-use std::fmt;
-
-use serde::{Deserialize, Serialize, Serializer};
+use std::net::{TcpListener, TcpStream, Shutdown};
+use std::thread;
+use std::io::{Read, Write};
+use std::str::from_utf8;
 
 #[derive(Debug)]
-pub struct NodeError<'a>{
-    err: &'a str,
-}
-
-impl<'a> NodeError<'a> {
-    pub fn new(err:&'a str) -> Self {
-        Self{ err }
-    }
-}
-
-impl<'a> Error for NodeError<'a> {
-}
-
-impl<'a> fmt::Display for NodeError<'a> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Node error is here!")
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug)]
 pub struct Node<T> {    // T for messages type. Can be a simple as string or custom struct
-    in_buffer: VecDeque<T>,     // https://doc.rust-lang.org/std/collections/struct.VecDeque.html
-    out_buffer: VecDeque<T>,
+in_buffer: Vec<T>,     // https://doc.rust-lang.org/std/collections/struct.VecDeque.html
+out_buffer: Vec<T>,
     // ... more ??
 }
 
-#[allow(dead_code)]
 impl<T> Node <T> {
     ///
     /// Create new node
     ///
     pub fn new() -> Self {
         Self {
-            in_buffer: VecDeque::new(),
-            out_buffer: VecDeque::new(),
+            in_buffer: Vec::new(),
+            out_buffer: Vec::new(),
         }
     }
 
     ///
-    /// Connect node to the net.
+    /// Send the message to the ip's machine socket
     ///
-    /// ..Probably we need to pass addresses were to connect..
-    pub fn connect(&self) -> Result<(), Box<dyn Error>> {   // return is same as in CLI tutorial
-        // if smth wrong: Err("Shit! Something went wrong!")
+    pub fn send_message(&self, ip_address: &'static str, message: String) {
+        let self_local_ip = local_ip::get().unwrap().to_string();
 
-        Ok(())
-    }
+        // if ip match self ip
+        if self_local_ip != ip_address{
+            println!("Trying to connect {}...", ip_address);
+            let ip_port = format!("{}:{}", ip_address, "6000"); // combine ip address and port
 
-    /// get network status
-    pub fn get_status(&self) -> Result<String, Box<dyn Error>> { // ??custom error, response
-        let status: bool = true; // check status
-        if status {
-            Ok(String::from("All good!"))
-        }
-        else {
-            Err(Box::new(NodeError::new("node error")))
-        }
-    }
-
-    ///
-    /// Get message
-    ///
-    pub fn get_message(&mut self) -> Option<T> {
-        self.in_buffer.pop_front()
-    }
+            match TcpStream::connect(ip_port) {
+                Ok(mut stream) => {
+                    println!("Successfully connected to {}", ip_address);
+                    let msg = message.as_bytes();
+                    stream.write(msg).unwrap();
+                },
+                Err(_e) => {
+                    println!("Failed to connect to {}", ip_address);
+                }
+            } // match
+        } // if
+    } // send_message()
 
     ///
-    /// Send message
+    /// Check the connectivity of the ip's machine server node
     ///
-    pub fn send_message(&mut self, message: T) -> Result<(), Box<dyn Error>> {  // ?? add error if buffer is full
-        Ok(self.out_buffer.push_back(message))
-    }
+    pub fn ping_server(&self, ip_address: &'static str) {
+        let self_local_ip = local_ip::get().unwrap().to_string();
 
-    // ??... other methods.. ??
-}
+        // if ip match self ip
+        if self_local_ip != ip_address{
+            let ip_port = format!("{}:{}", ip_address, "6000"); // combine ip address and port
+
+            match TcpStream::connect(ip_port) {
+                Ok(mut stream) => {
+                    let msg = b"ping";
+                    stream.write(msg).unwrap();
+
+                    let mut data = [0 as u8; 4];
+                    match stream.read(&mut data) {
+                        Ok(_) => {
+                            if &data == msg {
+                                println!("Pinged {} successful", ip_address);
+                            } else {
+                                let text = from_utf8(&data).unwrap();
+                                println!("Unexpected reply: {}", text);
+                            }
+                        },
+                        Err(e) => {
+                            println!("Failed to receive data: {}", e);
+                        }
+                    } // match
+
+                },
+                Err(_e) => {
+                    println!("Failed to connect to {}", ip_address);
+                }
+            } // match
+        } // if
+    } // ping_server()
+
+    ///
+    /// The server initialization function
+    ///
+    pub fn server(&self) {
+        let listener = TcpListener::bind("0.0.0.0:6000").unwrap();
+        // accept connections and process them, spawning a new thread for each one
+        println!("Server listening on port 6000...");
+        for stream in listener.incoming() {
+            match stream {
+                Ok(mut stream) => {
+                    thread::spawn(move|| {
+                        // connection succeeded
+                        let mut data = [0 as u8; 50];
+
+                        match stream.read(&mut data) {
+                            Ok(size) => {
+                                let recv_data = from_utf8(&data[0..size]).unwrap();
+                                if recv_data == "ping"{
+                                    stream.write(&data[0..size]).unwrap();
+                                    println!("Pinged from {}", stream.peer_addr().unwrap().ip());
+                                } else {
+                                    println!("Data received from {}: {}", stream.peer_addr().unwrap().ip(), recv_data);
+                                } // if.else
+                                true
+                            },
+                            Err(_) => {
+                                println!("An error occurred, terminating connection with {}", stream.peer_addr().unwrap().ip());
+                                stream.shutdown(Shutdown::Both).unwrap();
+                                false
+                            }
+                        } // match
+                    });
+                }
+                Err(e) => {
+                    println!("Connection Failed: {}", e);
+                }
+            } // match
+        } // for
+        // close the socket server
+        drop(listener);
+    } // server()
+
+} // impl Node
 
 
 
 #[cfg(test)]
 mod tests {
+    use crate::Node;
+    use std::thread;
+    use std::time::Duration;
+
     #[test]
     fn it_works() {
-        assert_eq!(2 + 2, 4);
-        assert!(false, "unimplemented");
+
+        let node_server: Node<String> = Node::new();
+        let mut children = Vec::new();
+        static NETWORK: [&str; 3] = ["192.168.70.1", "192.168.70.129", "192.168.70.130"];
+
+        children.push(thread::spawn(move || {
+            node_server.server();
+        }));
+
+        for node_ip in NETWORK.iter() {
+            let node_client: Node<String> = Node::new();
+            children.push(thread::spawn(move || {
+                thread::sleep(Duration::from_millis(100));
+                // node_client.ping_server(node_server);
+                node_client.send_message(node_ip, String::from("This is the message from host1"));
+            }));
+        } // for
+
+        // collect each thread's result
+        for child in children {
+            child.join().expect("Failed to join threads");
+        } // for
     }
 }
