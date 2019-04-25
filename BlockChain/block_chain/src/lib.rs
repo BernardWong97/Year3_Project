@@ -16,10 +16,12 @@ pub mod block_header;
 pub mod hashable;
 pub mod transaction;
 
-use serde::{Deserialize, Serialize, Serializer};
-use sha2::{Digest, Sha256, Sha512};
 use std::convert::AsMut;
-use std::{mem, error};
+use std::{mem, error, io};
+use std::fmt::Debug;
+use core::borrow::BorrowMut;
+use sha2::{Digest, Sha256, Sha512};
+use serde::{Deserialize, Serialize, Serializer};
 use uuid::Uuid;
 
 pub use crate::block::Block;
@@ -28,14 +30,14 @@ use crate::hashable::convert_u64_to_u8_array;
 use crate::hashable::HashSha256;
 use crate::hashable::Hashable;
 use crate::transaction::Transaction;
-use core::borrow::BorrowMut;
-use std::fmt::Debug;
+use std::io::ErrorKind;
+
 
 //////////////////////////////// Block Chain ////////////////////////////
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct BlockChain<T> {
-    uuid: Uuid,
+    pub uuid: Uuid,
     pub chain: Vec<Block<T>>,
     pub pending_transactions: Vec<T>, // pending transactions
 }
@@ -129,7 +131,11 @@ where
 
     /// Get all blocks as slice starting from a given block.
     pub fn get_blocks_starting_at(&self, index: usize) -> Result<&[Block<T>], Box<dyn error::Error>> {
-        Ok(&self.chain[index..])
+        match index < self.chain.len() {
+            true => Ok(&self.chain[index..]),
+            false => Err(Box::new( io::Error::new(ErrorKind::InvalidInput, "Index out of bounds")))
+        }
+
     }
 
     /// Add transaction to pending transactions

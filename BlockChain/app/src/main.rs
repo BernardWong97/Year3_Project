@@ -45,6 +45,7 @@ use std::ptr::read;
 
 #[post("/message", format = "json", data = "<message>")]
 /// Adds Message to the pending list
+/// todo: send partial message details (no timestamp)
 fn add_message(message: Json<Message>, app: State<Mutex<App>>) -> JsonValue {
     let mut app = app.lock().expect("Message: App Lock.");
 
@@ -70,7 +71,8 @@ fn get_pending_messages(app: State<Mutex<App>>) -> JsonValue {
 fn get_messages_user(user: String, app: State<Mutex<App>>) -> Option<JsonValue> {
     let app = app.lock().expect("Message: App Lock");
 
-    app.get_messages(user.as_str()).map(|val| json!(val))
+    app.get_messages(user.as_str())
+        .map(|val| json!(val))
 }
 
 
@@ -98,10 +100,10 @@ fn get_blocks_starting(index: usize, app: State<Mutex<App>>) -> JsonValue {
 
     match app.get_blocks_from(index) {
         Ok(blocks) => json!(blocks),
-        Err(_err) =>         // ToDo: add reason why retrieving blocks failed
+        Err(err) =>         // ToDo: add reason why retrieving blocks failed
             json!({
                 "status":"err",
-                "err":"Couldn't retrieve blocks: [todo: add reason]"
+                "err":format!("couldn't get. Reason {}", err.description())
             }),
     }
 }
