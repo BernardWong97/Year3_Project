@@ -8,6 +8,7 @@
 //! - ?? get transactions from particular time stamp instead of getting all pending.
 //! - Create custom error for pass error information.
 //! - Error should implement rocket::Response
+//! - add endpoint to create message from given details
 
 
 #![feature(proc_macro_hygiene, decl_macro)]
@@ -31,8 +32,9 @@ use std::io::Read;
 use std::sync::Mutex;
 use std::fs;
 use std::env::join_paths;
+use std::ptr::read;
 
-use app::{App};
+use app::{App, AppError, MessageTemplate};
 use app::config::Config;
 use app::Message;
 use block_chain::hashable::Hashable;
@@ -46,14 +48,13 @@ use miner::Miner;
 
 ////////////////////// Messages /////////////////////////////////
 
-
 #[post("/message", format = "json", data = "<message>")]
 /// Adds Message to the pending list
-fn add_message(message: Json<Message>, app: State<Mutex<App>>) -> JsonValue {
+fn add_message(message: Json<MessageTemplate>, app: State<Mutex<App>>) -> JsonValue {
     let mut app = app.lock().expect("Message: App Lock.");
 
     match app.add_message(message.0) {
-        Ok(_) => json!({ "status":"ok" }),
+        Ok(_) => json!({ "status":"ok", "msg":"Message was added to the message queue." }),
         Err(_err) => json!({ "status":"err", "err": "Couldn't add message to the pending list" })
     }
 }
@@ -76,6 +77,8 @@ fn get_messages_user(user: String, app: State<Mutex<App>>) -> Option<JsonValue> 
 
     app.get_messages(user.as_str()).map(|val| json!(val))
 }
+
+
 
 
 ////////////////////// Block ////////////////////////////////
@@ -158,7 +161,6 @@ fn generate_new_block(app: State<Mutex<App>>) -> JsonValue {
 }
 
 
-
 ////////////////////// Miner ////////////////////////////////
 
 #[post("/miner", format = "application/json", data = "<block_header>")]
@@ -189,7 +191,7 @@ fn get_nonce(block_header: Json<BlockHeader>, app: State<Mutex<App>>) -> Option<
 /// ToDo:
 /// - ?? Control App ??
 fn blockchain_control(command: String, app: State<Mutex<App>>) -> Option<JsonValue> {
-    let app = app.lock().expect("Block: App Lock");
+    let app = app.lock().expect("Blockchain: App Lock");
 
     match command.as_str() {
         "backup" => { app.save_blockchain(); Some(json!({"status":"ok"})) },
@@ -236,6 +238,13 @@ fn world() -> &'static str {
     "App says: Hello!"
 }
 
+
+
+
+
+
+
+
 ///
 /// builds "Rocket"
 ///
@@ -250,8 +259,7 @@ fn rocket() -> Result<Rocket, Box<dyn error::Error>> {
     // You can also deserialize this
     let cors = rocket_cors::Cors {
         allowed_origins,
-        allowed_methods: vec![Method::Get].into_iter().map(From::from).collect(),
-        allowed_headers: AllowedHeaders::some(&["Authorization", "Accept"]),
+        allowed_methods: vec![Method::Get, Method::Post, Method::Options].into_iter().map(From::from).collect(),
         allow_credentials: true,
         ..Default::default()
     };
@@ -275,12 +283,15 @@ fn rocket() -> Result<Rocket, Box<dyn error::Error>> {
             world,
             // message
             add_message, get_pending_messages, get_messages_user,
+//            add_message_o,
             // blocks
             add_blocks, get_blocks_starting,
             get_genesis_block, get_last_block, generate_new_block,
             // miner
             get_nonce,
             blockchain_control,
+            // app
+            get_app_info, auto_block,
     ])
         .manage(Mutex::new(app))
         .attach(cors);

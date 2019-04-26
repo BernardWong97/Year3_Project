@@ -5,12 +5,14 @@
 //! # author: Mindaugas Sharskus
 //! # date: 31-03-2019
 //!
-//! ToDo:
+//! ToDo (enchantments):
 //! - append changes to file instead overwriting it each time blockchain is saved.
 //! - implement floating points for the transaction (message) cost
+//! - Add ability to send crypto credits with the message
 
 
 pub mod config;
+mod error;
 
 use crate::config::Config;
 pub use crate::error::AppError;
@@ -42,16 +44,17 @@ pub const BLOCK_REWARD: usize = 20;
 pub const MESSAGE_RECEIVE_REWARD: usize = 2usize;
 pub const MESSAGE_SEND_COST: usize = 7usize;
 
+
+
 //////////////////////////// APP ///////////////////////////
 
 pub type Message = Transaction<String>;
 
 #[derive(Deserialize, Debug)]
 pub struct MessageTemplate {
-    pub sender: String,
     pub receiver: String,
     pub value: usize,
-    pub load: String,
+    pub text: String,
 }
 
 #[derive(Serialize, Debug)]
@@ -181,7 +184,21 @@ impl<'a> App<'a> {
     }
 
     /// Add given message to the pending message list.
-    pub fn add_message(&mut self, message: Message) -> Result<(), Box<dyn error::Error>> {
+    pub fn add_message(&mut self, message: MessageTemplate) -> Result<(), Box<dyn Error>> {
+        let app_info = self.get_app_info();
+        let user_balance = app_info.user_balance;
+
+        if user_balance < MESSAGE_SEND_COST as i64 {
+            return Err(Box::new(AppError::new("Insufficient funds.")));
+        }
+
+        let message= Message {
+            id: TransactionID::new(self.blockchain.get_uuid().clone()),
+            sender: self.config.get_value(KEY_APP_USER).unwrap().clone(),
+            receiver: message.receiver,
+            value: message.value,
+            load: message.text,
+        };
         self.blockchain.add_transaction(message);
 
         Ok(())

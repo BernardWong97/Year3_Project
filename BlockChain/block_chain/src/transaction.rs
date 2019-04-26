@@ -25,15 +25,29 @@ use std::fmt::Debug;
 
 //////////////////////////////// Transaction ///////////////////////////
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Default)]
 pub struct TransactionID {
     timestamp: u64,
     blockchain_uuid: Uuid,
     // block_hash: HashSha256,     // hash of the block then transaction was generated
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+impl TransactionID {
+    pub fn new(uuid: Uuid) -> Self {
+        Self {
+            timestamp: SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap_or_default()
+                .as_secs(),
+            blockchain_uuid: uuid,
+        }
+
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Default)]
 pub struct Transaction<T> {
+//    #[serde(default)]
     pub id: TransactionID,
     pub sender: String,
     pub receiver: String,
@@ -49,13 +63,7 @@ where
     pub fn new(sender: &str, receiver: &str, load: T, blockchain: &mut BlockChain<Transaction<T>>) {
         // create transaction
         let transaction = Self {
-            id: TransactionID {
-                timestamp: SystemTime::now()
-                    .duration_since(UNIX_EPOCH)
-                    .unwrap_or_default()
-                    .as_secs(),
-                blockchain_uuid: blockchain.get_uuid().clone(),
-            },
+            id: TransactionID::new(blockchain.get_uuid().clone()),
             sender: sender.to_string(),
             receiver: receiver.to_string(),
             value: 0,
@@ -65,7 +73,6 @@ where
         blockchain.add_transaction(transaction);
     }
 }
-
 
 
 impl<T> Hashable for Transaction<T>
