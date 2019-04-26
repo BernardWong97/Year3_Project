@@ -7,28 +7,31 @@
 //!
 //! ToDo:
 //! - append changes to file instead overwriting it each time blockchain is saved.
+//! - implement floating points for the transaction (message) cost
 
 
 pub mod config;
 
-use std::error;
+use crate::config::Config;
+pub use crate::error::AppError;
+
+use std::error::Error;
 use std::fs;
 use std::fmt;
 use std::io;
 use std::convert;
+
 use std::io::{Write, Read};
 
 use core::fmt::Display;
 
 use serde::{Deserialize, Serialize, Serializer};
-
 use block_chain::{BlockChain, Block};
-use block_chain::transaction::Transaction;
+use block_chain::transaction::{Transaction, TransactionID};
 use node::Node;
 use miner::Miner;
-use crate::config::Config;
 use core::borrow::Borrow;
-
+use uuid::Uuid;
 
 pub const CONFIG_FILE:&'static str = "settings_file.txt";
 
@@ -43,10 +46,18 @@ pub const MESSAGE_SEND_COST: usize = 7usize;
 
 pub type Message = Transaction<String>;
 
+#[derive(Deserialize, Debug)]
+pub struct MessageTemplate {
+    pub sender: String,
+    pub receiver: String,
+    pub value: usize,
+    pub load: String,
+}
+
 #[derive(Serialize, Debug)]
 pub struct AppInfo<'i> {
     username: &'i str,
-    user_balance: usize,  // balance only whole numbers (no fractions)
+    user_balance: i64,  // balance only whole numbers (no fractions)
     blockchain_uuid: &'i Uuid,
     chain_len: usize,
     block_reward: usize,
@@ -67,7 +78,7 @@ pub struct App <'a>{
 
 #[allow(dead_code)]
 impl<'a> App<'a> {
-    pub fn create(config:Config<'a>) -> Result<Self, Box<dyn error::Error>> {
+    pub fn create(config:Config<'a>) -> Result<Self, Box<dyn Error>> {
         let uri = config.get_value(KEY_BLOCKCHAIN_FILE)
             .ok_or("Blockchain backup file is not given")?;
 
@@ -91,7 +102,7 @@ impl<'a> App<'a> {
         Ok(this)
     }
 
-    fn verify_config(config: &Config<'a>) -> Result<(), Box<dyn error::Error>>{
+    fn verify_config(config: &Config<'a>) -> Result<(), Box<dyn Error>>{
         let app_configs = vec![
             KEY_APP_USER,         // will be used as `sender` in message
             KEY_MINER_URL,
@@ -101,11 +112,11 @@ impl<'a> App<'a> {
         Ok(())
     }
 
-    pub fn save(&self) -> Result<(), Box<dyn error::Error>> {
+    pub fn save(&self) -> Result<(), Box<dyn Error>> {
         Ok(())
     }
 
-    pub fn connect_to_network(&self) -> Result<(), Box<dyn error::Error>> {
+    pub fn connect_to_network(&self) -> Result<(), Box<dyn Error>> {
         self.node.connect()
     }
 
@@ -114,14 +125,14 @@ impl<'a> App<'a> {
 
 
 
-    pub fn get_app_info(&self) -> Result<AppInfo, Box<dyn Error>> {
+    pub fn get_app_info(&self) -> AppInfo{
         let username = self.config.get_value(KEY_APP_USER)
-            .ok_or(AppError::new("Can not get username"))?;
+            .unwrap();
 
         let blockchain_uuid = self.blockchain.get_uuid();
 
         let user_messages = self.get_messages(username)
-            .ok_or(AppError::from("User have no funds"))?;
+            .unwrap_or(vec![]);
 
         let block_rewards = user_messages.iter()
             .filter(|msg| {
@@ -141,20 +152,19 @@ impl<'a> App<'a> {
             .map(|_| MESSAGE_SEND_COST)
             .sum::<usize>();
 
-        println!("b:{}, mr{}, mc{}", block_rewards, message_rewards, messages_costs);
+        let user_balance = (block_rewards + message_rewards) as i64 - messages_costs as i64;
 
-        let user_balance = (block_rewards + message_rewards) - messages_costs;
+        let chain_len = self.get_last_block().unwrap().get_index();
 
-
-        Ok(AppInfo{
+        AppInfo{
             username,
             user_balance,
             blockchain_uuid,
-            chain_len: 0,
-            block_reward: 0,
-            message_read_reward: 0,
-            message_send_cost: 0
-        })
+            chain_len,
+            block_reward: BLOCK_REWARD,
+            message_read_reward: MESSAGE_RECEIVE_REWARD,
+            message_send_cost: MESSAGE_SEND_COST,
+        }
     }
 
 
@@ -203,7 +213,7 @@ impl<'a> App<'a> {
     /////////////////////////////// Block /////////////////////////////////
 
     /// Adds block to blockchain.
-    pub fn add_block(&mut self, block: Block<Message>) -> Result<(), Box<dyn error::Error>> {
+    pub fn add_block(&mut self, block: Block<Message>) -> Result<(), Box<dyn Error>> {
         self.blockchain.add_block(block).map(|_| ())
     }
 
@@ -214,17 +224,17 @@ impl<'a> App<'a> {
     }
 
     /// Get genesis block.
-    pub fn get_genesis_block(&self) -> Result<&Block<Message>, Box<dyn error::Error>> {
+    pub fn get_genesis_block(&self) -> Result<&Block<Message>, Box<dyn Error>> {
         Ok(self.blockchain.get_block_genesis())
     }
 
     /// Get last block in the blockchain.
-    pub fn get_last_block(&self) -> Result<&Block<Message>, Box<dyn error::Error>> {
+    pub fn get_last_block(&self) -> Result<&Block<Message>, Box<dyn Error>> {
         Ok(self.blockchain.get_block_last())
     }
 
     /// Gets all blocks starting from the given one.
-    pub fn get_blocks_from(&self, index: usize) -> Result<&[Block<Message>], Box<dyn error::Error>> {
+    pub fn get_blocks_from(&self, index: usize) -> Result<&[Block<Message>], Box<dyn Error>> {
         self.blockchain.get_blocks_starting_at(index)
     }
 
@@ -233,7 +243,7 @@ impl<'a> App<'a> {
     /////////////////////////////// Block /////////////////////////////////
 
     /// Saves `BlockChain` to the file `KEY_BLOCKCHAIN_FILE`
-    pub fn save_blockchain(&self) -> Result<(), Box<dyn error::Error>> {
+    pub fn save_blockchain(&self) -> Result<(), Box<dyn Error>> {
         let path = self.config.get_value(KEY_BLOCKCHAIN_FILE).ok_or("Couldn't get path")?;
         fs::File::create(path)?;
 
@@ -249,7 +259,7 @@ impl<'a> App<'a> {
     }
 
     /// Load `BlockChain` form file `KEY_BLOCKCHAIN_FILE`
-    pub fn load_blockchain(uri: &str) -> Result<BlockChain<Message>, Box<dyn error::Error>> {
+    pub fn load_blockchain(uri: &str) -> Result<BlockChain<Message>, Box<dyn Error>> {
         let file = fs::File::open(uri)?;
         let buffered = io::BufReader::new(file);
         let deserialized: BlockChain<Message> = serde_json::from_reader(buffered)?;

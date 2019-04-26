@@ -196,6 +196,34 @@ fn blockchain_control(command: String, app: State<Mutex<App>>) -> Option<JsonVal
 
 
 
+////////////////////// App ////////////////////////////////
+
+#[get("/info")]
+/// Gets app info
+fn get_app_info(app: State<Mutex<App>>) -> JsonValue {
+    let app = app.lock().expect("Block: App Lock");
+
+
+    json!(app.get_app_info())
+}
+
+#[get("/auto")]
+/// Automatically generates block (gets new -> mines -> adds to blockchain)
+fn auto_block(app: State<Mutex<App>>) -> Option<JsonValue> {
+    let mut app = app.lock().expect("Blockchain: App Lock");
+    let mut block = app.generate_next_block();
+
+    let nonce = Miner::new(&block.header).start_thread().join().unwrap();
+
+    block.header.set_nonce(nonce);
+    app.add_block(block).ok()?;
+
+    Some(json!({"status":"ok"}))
+}
+
+
+
+
 ///
 /// Says hello.
 ///

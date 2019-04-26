@@ -5,6 +5,7 @@ authors = ["Mindaugas Sharskus <g00339629@gmit.ie>"]
 edition = "2018"
 
 [dependencies]
+uuid = { version = "0.7", features = ["v4", "serde"] }
 # hashing
 sha2 = "0.8"
 # serde
