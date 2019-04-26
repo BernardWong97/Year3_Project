@@ -16,11 +16,15 @@
 #[macro_use] extern crate rocket_contrib;
 #[macro_use] extern crate serde_derive;
 extern crate reqwest;
+extern crate rocket_cors;
+
 use reqwest::Client;
 
 use rocket::{Request, Rocket, response::content, data::Data, State, Response};
 use rocket_contrib::json::{JsonValue, Json};
 use rocket::config::{Environment};
+use rocket::http::Method;
+use rocket_cors::{AllowedHeaders, AllowedOrigins, Error};
 
 use std::error;
 use std::io::Read;
@@ -36,7 +40,7 @@ use block_chain::transaction::Transaction;
 use block_chain::Block;
 use block_chain::block_header::BlockHeader;
 use miner::Miner;
-use std::ptr::read;
+
 
 
 
@@ -236,6 +240,24 @@ fn world() -> &'static str {
 /// builds "Rocket"
 ///
 fn rocket() -> Result<Rocket, Box<dyn error::Error>> {
+
+
+    let (allowed_origins, failed_origins) = AllowedOrigins::some(&[
+        "https://www.acme.com",
+        "http://localhost:8080",
+    ]);
+
+    // You can also deserialize this
+    let cors = rocket_cors::Cors {
+        allowed_origins,
+        allowed_methods: vec![Method::Get].into_iter().map(From::from).collect(),
+        allowed_headers: AllowedHeaders::some(&["Authorization", "Accept"]),
+        allow_credentials: true,
+        ..Default::default()
+    };
+
+
+
     let config = match Config::from(app::CONFIG_FILE){
         Ok(content) => content,
         Err(_err) => {
@@ -260,7 +282,8 @@ fn rocket() -> Result<Rocket, Box<dyn error::Error>> {
             get_nonce,
             blockchain_control,
     ])
-        .manage(Mutex::new(app));
+        .manage(Mutex::new(app))
+        .attach(cors);
 
     Ok(rocket)
 }
