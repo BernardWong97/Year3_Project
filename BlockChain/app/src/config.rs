@@ -17,9 +17,12 @@ use std::io;
 use std::fs;
 use std::collections;
 
+use serde::{Deserialize, Serialize};
 
-#[derive( Debug)]
+
+#[derive(Serialize, Debug)]
 pub struct Config<'a>{
+    #[serde(skip)]
     settings_file_name: &'a str,
     settings: collections::HashMap<String, String>,
 }

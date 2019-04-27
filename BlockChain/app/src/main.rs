@@ -6,7 +6,7 @@
 //!
 //! ToDo (improvements):
 //! - ?? get transactions from particular time stamp instead of getting all pending.
-//! - Create custom error for pass error information.
+//! ~~- Create custom error for pass error information.~~
 //! - Error should implement rocket::Response
 //! - add endpoint to create message from given details
 //! - add limit message get amount( sort by timestamp)
@@ -16,30 +16,25 @@
 
 #[macro_use] extern crate rocket;
 #[macro_use] extern crate rocket_contrib;
-#[macro_use] extern crate serde_derive;
 extern crate reqwest;
 extern crate rocket_cors;
 
 use reqwest::Client;
 
-use rocket::{Request, Rocket, response::content, data::Data, State, Response};
+use rocket::{Rocket, State};
 use rocket_contrib::json::{JsonValue, Json};
 use rocket::config::{Environment};
 use rocket::http::Method;
-use rocket_cors::{AllowedHeaders, AllowedOrigins, Error};
+//use rocket_cors::{AllowedHeaders, AllowedOrigins, Error};
 
 use std::error;
-use std::io::Read;
 use std::sync::Mutex;
 use std::fs;
-use std::env::join_paths;
-use std::ptr::read;
 
-use app::{App, AppError, MessageTemplate};
+use app::{App, MessageTemplate, AppError};
 use app::config::Config;
 use app::Message;
 use block_chain::hashable::Hashable;
-use block_chain::transaction::Transaction;
 use block_chain::Block;
 use block_chain::block_header::BlockHeader;
 use miner::Miner;
@@ -54,9 +49,20 @@ use miner::Miner;
 fn add_message(message: Json<MessageTemplate>, app: State<Mutex<App>>) -> JsonValue {
     let mut app = app.lock().expect("Message: App Lock.");
 
-    match app.add_message(message.0) {
+    match app.add_message(None, message.0) {
         Ok(_) => json!({ "status":"ok", "msg":"Message was added to the message queue." }),
-        Err(_err) => json!({ "status":"err", "err": "Couldn't add message to the pending list" })
+        Err(err) => json!({ "status":"err", "err": err.to_string() }),
+    }
+}
+
+#[post("/message/<user>", format = "json", data = "<message>")]
+/// Adds Message to the pending list as different user
+fn add_message_user(user: String, message: Json<MessageTemplate>, app: State<Mutex<App>>) -> JsonValue {
+    let mut app = app.lock().expect("Message: App Lock.");
+
+    match app.add_message(Some(user), message.0) {
+        Ok(_) => json!({ "status":"ok", "msg":"Message was added to the message queue." }),
+        Err(err) => json!({ "status":"err", "err": err.to_string() }),
     }
 }
 
@@ -99,11 +105,7 @@ fn add_blocks(block: Json<Block<Message>>, app: State<Mutex<App>>) -> JsonValue 
 
     match app.add_block(block.0) {
         Ok(()) => json!({"status":"ok"}),
-        Err(_err) =>             // ToDo: add reason why add block failed
-            json!({
-                "status":"err",
-                "err":"Couldn't add block to blockchain: [TODO: add reason]"
-            })
+        Err(err) => json!({ "status":"err", "err":err.to_string() }),
     }
 }
 
@@ -114,11 +116,7 @@ fn get_blocks_starting(index: usize, app: State<Mutex<App>>) -> JsonValue {
 
     match app.get_blocks_from(index) {
         Ok(blocks) => json!(blocks),
-        Err(_err) =>         // ToDo: add reason why retrieving blocks failed
-            json!({
-                "status":"err",
-                "err":"Couldn't retrieve blocks: [todo: add reason]"
-            }),
+        Err(err) => json!({ "status":"err", "err":err.to_string() }),
     }
 }
 
@@ -132,11 +130,7 @@ fn get_genesis_block(app: State<Mutex<App>>) -> JsonValue {
             "genesis":block,
             "hash":block.hash()
         }),
-        Err(_err) =>         // ToDo: add reason why retrieving blocks failed
-            json!({
-                "status":"err",
-                "err":"Couldn't retrieve genesis blocks: [todo: add reason]"
-            }),
+        Err(err) => json!({ "status":"err", "err":err.to_string() }),
     }
 }
 
@@ -150,11 +144,7 @@ fn get_last_block(app: State<Mutex<App>>) -> JsonValue {
             "genesis":block,
             "hash":block.hash()
         }),
-        Err(_err) =>         // ToDo: add reason why retrieving blocks failed
-            json!({
-                "status":"err",
-                "err":"Couldn't retrieve last blocks: [todo: add reason]"
-            }),
+        Err(err) => json!({ "status":"err", "err":err.to_string() }),
     }
 }
 
@@ -222,11 +212,13 @@ fn get_app_info(app: State<Mutex<App>>) -> JsonValue {
     json!(app.get_app_info())
 }
 
-#[get("/auto")]
+#[get("/auto/<miner>")]
 /// Automatically generates block (gets new -> mines -> adds to blockchain)
-fn auto_block(app: State<Mutex<App>>) -> Option<JsonValue> {
+fn auto_block(miner: Option<String>, app: State<Mutex<App>>) -> Option<JsonValue> {
     let mut app = app.lock().expect("Blockchain: App Lock");
     let mut block = app.generate_next_block();
+
+    block.add_record(app.get_miners_reward_message(miner));
 
     let nonce = Miner::new(&block.header).start_thread().join().unwrap();
 
@@ -250,24 +242,21 @@ fn world() -> &'static str {
 
 
 
-
-
-
-
 ///
 /// builds "Rocket"
 ///
 fn rocket() -> Result<Rocket, Box<dyn error::Error>> {
 
 
-    let (allowed_origins, failed_origins) = AllowedOrigins::some(&[
-        "https://www.acme.com",
-        "http://localhost:8080",
-    ]);
+//    let (allowed_origins, failed_origins) = AllowedOrigins::some(&[
+//        "https://www.acme.com",
+//        "http://localhost:8080",
+//        "http://192.168.1.2:8080",
+//    ]);
 
     // You can also deserialize this
     let cors = rocket_cors::Cors {
-        allowed_origins,
+//        allowed_origins,
         allowed_methods: vec![Method::Get, Method::Post, Method::Options].into_iter().map(From::from).collect(),
         allow_credentials: true,
         ..Default::default()
@@ -292,7 +281,7 @@ fn rocket() -> Result<Rocket, Box<dyn error::Error>> {
             world,
             // message
             add_message, get_pending_messages, get_messages_user,
-            get_messages,
+            get_messages, add_message_user,
             // blocks
             add_blocks, get_blocks_starting,
             get_genesis_block, get_last_block, generate_new_block,

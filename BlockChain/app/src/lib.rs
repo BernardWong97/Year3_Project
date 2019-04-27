@@ -132,6 +132,22 @@ impl<'a> App<'a> {
         let username = self.config.get_value(KEY_APP_USER)
             .unwrap();
 
+        let user_balance = self.get_user_balance(username);
+        let blockchain_uuid = self.blockchain.get_uuid();
+        let chain_len = self.get_last_block().unwrap().get_index();
+
+        AppInfo{
+            username,
+            user_balance,
+            blockchain_uuid,
+            chain_len,
+            block_reward: BLOCK_REWARD,
+            message_read_reward: MESSAGE_RECEIVE_REWARD,
+            message_send_cost: MESSAGE_SEND_COST,
+        }
+    }
+
+    pub fn get_user_balance(&self, username: &str) -> i64 {
         let blockchain_uuid = self.blockchain.get_uuid();
 
         let user_messages = self.get_messages(Some(username))
@@ -155,19 +171,14 @@ impl<'a> App<'a> {
             .map(|_| MESSAGE_SEND_COST)
             .sum::<usize>();
 
-        let user_balance = (block_rewards + message_rewards) as i64 - messages_costs as i64;
+        let pending_cost = self.get_pending_messages()
+            .unwrap_or(&vec![]).iter()
+            .filter(|msg| &msg.sender == username)
+            .map(|_| MESSAGE_SEND_COST)
+            .sum::<usize>();
 
-        let chain_len = self.get_last_block().unwrap().get_index();
 
-        AppInfo{
-            username,
-            user_balance,
-            blockchain_uuid,
-            chain_len,
-            block_reward: BLOCK_REWARD,
-            message_read_reward: MESSAGE_RECEIVE_REWARD,
-            message_send_cost: MESSAGE_SEND_COST,
-        }
+        (block_rewards + message_rewards) as i64 -messages_costs as i64 -pending_cost as i64
     }
 
 
@@ -184,17 +195,19 @@ impl<'a> App<'a> {
     }
 
     /// Add given message to the pending message list.
-    pub fn add_message(&mut self, message: MessageTemplate) -> Result<(), Box<dyn Error>> {
-        let app_info = self.get_app_info();
-        let user_balance = app_info.user_balance;
+    pub fn add_message(&mut self, sender: Option<String>, message: MessageTemplate) -> Result<(), Box<dyn Error>> {
+        let sender = sender.unwrap_or(
+            self.config.get_value(KEY_APP_USER).unwrap().clone()
+        );
+        let sender_balance = self.get_user_balance(sender.as_str());
 
-        if user_balance < MESSAGE_SEND_COST as i64 {
+        if sender_balance < MESSAGE_SEND_COST as i64 {
             return Err(Box::new(AppError::new("Insufficient funds.")));
         }
 
         let message= Message {
             id: TransactionID::new(self.blockchain.get_uuid().clone()),
-            sender: self.config.get_value(KEY_APP_USER).unwrap().clone(),
+            sender,
             receiver: message.receiver,
             value: message.value,
             load: message.text,
@@ -202,6 +215,20 @@ impl<'a> App<'a> {
         self.blockchain.add_transaction(message);
 
         Ok(())
+    }
+
+    /// Creates miners reward message. Needs to be added to block before mining it.
+    pub fn get_miners_reward_message(&self, miner: Option<String>) -> Message {
+        let uuid = self.blockchain.get_uuid();
+        let receiver= miner.unwrap_or(self.config.get_value(KEY_APP_USER).unwrap().to_string());
+
+        Message {
+            id: TransactionID::new(uuid.clone()),
+            sender: uuid.to_hyphenated().to_string(),
+            receiver,
+            value: 0,
+            load: String::from("Reward for mined block"),
+        }
     }
 
     /// Get given user messages.
