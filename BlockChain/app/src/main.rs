@@ -9,6 +9,7 @@
 //! - Create custom error for pass error information.
 //! - Error should implement rocket::Response
 //! - add endpoint to create message from given details
+//! - add limit message get amount( sort by timestamp)
 
 
 #![feature(proc_macro_hygiene, decl_macro)]
@@ -60,6 +61,14 @@ fn add_message(message: Json<MessageTemplate>, app: State<Mutex<App>>) -> JsonVa
 }
 
 #[get("/message")]
+/// Gets all given user messages (sent & received)
+fn get_messages(app: State<Mutex<App>>) -> Option<JsonValue> {
+    let app = app.lock().expect("Message: App Lock");
+
+    app.get_messages(None).map(|val| json!(val))
+}
+
+#[get("/message/pending")]
 /// Gets all pending messages
 fn get_pending_messages(app: State<Mutex<App>>) -> JsonValue {
     let app = app.lock().expect("Message: App Lock.");
@@ -75,7 +84,7 @@ fn get_pending_messages(app: State<Mutex<App>>) -> JsonValue {
 fn get_messages_user(user: String, app: State<Mutex<App>>) -> Option<JsonValue> {
     let app = app.lock().expect("Message: App Lock");
 
-    app.get_messages(user.as_str()).map(|val| json!(val))
+    app.get_messages(Some(user.as_str())).map(|val| json!(val))
 }
 
 
@@ -283,7 +292,7 @@ fn rocket() -> Result<Rocket, Box<dyn error::Error>> {
             world,
             // message
             add_message, get_pending_messages, get_messages_user,
-//            add_message_o,
+            get_messages,
             // blocks
             add_blocks, get_blocks_starting,
             get_genesis_block, get_last_block, generate_new_block,

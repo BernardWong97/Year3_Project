@@ -39,6 +39,10 @@ class APIProvider {
         return http.post('/message', message)
     }
 
+    getMessages(){
+        return http.get('/message')
+    }
+
     create ({ resource, data, query }) {
         return http.post(resource, data, {
             params: query

@@ -134,7 +134,7 @@ impl<'a> App<'a> {
 
         let blockchain_uuid = self.blockchain.get_uuid();
 
-        let user_messages = self.get_messages(username)
+        let user_messages = self.get_messages(Some(username))
             .unwrap_or(vec![]);
 
         let block_rewards = user_messages.iter()
@@ -205,7 +205,11 @@ impl<'a> App<'a> {
     }
 
     /// Get given user messages.
-    pub fn get_messages(&self, user: &str) -> Option<Vec<&Message>> {
+    pub fn get_messages(&self, user: Option<&str>) -> Option<Vec<&Message>> {
+        let user = user.unwrap_or(
+            self.config.get_value(KEY_APP_USER)
+            .unwrap()
+        );
         // Collection where users messages will be stored
         let mut messages= Vec::new();
 
