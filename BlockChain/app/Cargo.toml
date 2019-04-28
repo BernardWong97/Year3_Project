@@ -5,6 +5,9 @@ authors = ["Mindaugas Sharskus <g00339629@gmit.ie>"]
 edition = "2018"
 
 [dependencies]
+itertools = "0.8.0"
+rand = "0.6.5"
+uuid = { version = "0.7", features = ["v4", "serde"] }
 # hashing
 sha2 = "0.8"
 # serde
@@ -13,6 +16,7 @@ serde_json = "1"
 serde_derive = "1.0"
 # api
 rocket = { version = "0.4.0", default-features = false }
+rocket_cors = "0.4.0"
 reqwest = "0.9"
 # blockchain
 block_chain = { path = "../block_chain" }

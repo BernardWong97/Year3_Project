@@ -1,8 +1,8 @@
 //!
-//! Miner API for controlling miner using HTTP request.
+//! `Miner` API for controlling miner using HTTP request.
 //!
-//! Mindaugas Sharskus
-//! 20-04-2019
+//! # author: Mindaugas Sharskus
+//! # since: 20-04-2019
 //!
 //! ToDo (feature improvements):
 //! - Allow multi hash mining (queue jobs)

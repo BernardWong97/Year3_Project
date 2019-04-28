@@ -4,6 +4,8 @@
 //! # author: Mindaugas Sharskus
 //! # date: 15-02-2019
 //!
+//! ToDo: (enchantments)
+//! - implement merkle tree functionality
 
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256, Sha512};

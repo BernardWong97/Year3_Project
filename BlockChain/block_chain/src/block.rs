@@ -7,19 +7,20 @@
 //! ToDo:
 //! - find better name for method `add_record`.
 //! - ?? hide `BlockHeader` ??
-//! - add blockchain uuid as parameter
+//! - add blockchain uuid as parameter to represent ad blocks id
 
+use std::fmt::Debug;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256, Sha512};
-use std::fmt::Debug;
+use core::borrow::BorrowMut;
+use uuid::Uuid;
 
 use crate::block_header::BlockHeader;
 use crate::{hashable, BlockChain};
 use crate::hashable::HashSha256;
 use crate::hashable::Hashable;
 use crate::transaction::Transaction;
-use core::borrow::BorrowMut;
-use uuid::Uuid;
+
 
 //////////////////////////////// Block ////////////////////////////
 

@@ -6,55 +6,79 @@
 //!
 //! ToDo (improvements):
 //! - ?? get transactions from particular time stamp instead of getting all pending.
-//! - Create custom error for pass error information.
 //! - Error should implement rocket::Response
+//! - add endpoint to create message from given details
+//! - add limit message get amount (sort by timestamp)
 
 
 #![feature(proc_macro_hygiene, decl_macro)]
 
 #[macro_use] extern crate rocket;
 #[macro_use] extern crate rocket_contrib;
-#[macro_use] extern crate serde_derive;
 extern crate reqwest;
-use reqwest::Client;
+extern crate rocket_cors;
 
-use rocket::{Request, Rocket, response::content, data::Data, State, Response};
+use reqwest::{Client, StatusCode};
+
+use rocket::{Rocket, State, Response, response::status};
 use rocket_contrib::json::{JsonValue, Json};
 use rocket::config::{Environment};
+use rocket::http::Method;
+use rocket::http::ContentType;
+use rocket::http::Status;
+use rocket::request::Request;
+use rocket::response::{self, Responder};
+//use rocket_cors::{AllowedHeaders, AllowedOrigins, Error};
 
 use std::error;
-use std::io::Read;
 use std::sync::Mutex;
 use std::fs;
-use std::env::join_paths;
+use std::io::Cursor;
+use std::error::Error;
+use rand::{thread_rng, Rng};
 
-use app::{App};
+use app::{App, MessageTemplate, AppError};
 use app::config::Config;
 use app::Message;
 use block_chain::hashable::Hashable;
-use block_chain::transaction::Transaction;
 use block_chain::Block;
 use block_chain::block_header::BlockHeader;
 use miner::Miner;
-use std::ptr::read;
 
 
 
 ////////////////////// Messages /////////////////////////////////
 
-
 #[post("/message", format = "json", data = "<message>")]
 /// Adds Message to the pending list
-fn add_message(message: Json<Message>, app: State<Mutex<App>>) -> JsonValue {
+fn add_message(message: Json<MessageTemplate>, app: State<Mutex<App>>) -> Result<JsonValue, Status> {
     let mut app = app.lock().expect("Message: App Lock.");
 
-    match app.add_message(message.0) {
-        Ok(_) => json!({ "status":"ok" }),
-        Err(_err) => json!({ "status":"err", "err": "Couldn't add message to the pending list" })
+    app.add_message(None, message.0)
+        .map(|_|json!({ "status":"ok", "msg":"Message was added to the message queue." }))
+        .map_err(|e| Status::ExpectationFailed)
+}
+
+#[post("/message/<user>", format = "json", data = "<message>")]
+/// Adds Message to the pending list as different user
+fn add_message_user(user: String, message: Json<MessageTemplate>, app: State<Mutex<App>>) -> JsonValue {
+    let mut app = app.lock().expect("Message: App Lock.");
+
+    match app.add_message(Some(user), message.0) {
+        Ok(_) => json!({ "status":"ok", "msg":"Message was added to the message queue." }),
+        Err(err) => json!({ "status":"err", "err": err.to_string() }),
     }
 }
 
 #[get("/message")]
+/// Gets all given user messages (sent & received)
+fn get_messages(app: State<Mutex<App>>) -> Option<JsonValue> {
+    let app = app.lock().expect("Message: App Lock");
+
+    app.get_messages(None).map(|val| json!(val))
+}
+
+#[get("/message/pending")]
 /// Gets all pending messages
 fn get_pending_messages(app: State<Mutex<App>>) -> JsonValue {
     let app = app.lock().expect("Message: App Lock.");
@@ -70,8 +94,9 @@ fn get_pending_messages(app: State<Mutex<App>>) -> JsonValue {
 fn get_messages_user(user: String, app: State<Mutex<App>>) -> Option<JsonValue> {
     let app = app.lock().expect("Message: App Lock");
 
-    app.get_messages(user.as_str()).map(|val| json!(val))
+    app.get_messages(Some(user.as_str())).map(|val| json!(val))
 }
+
 
 
 ////////////////////// Block ////////////////////////////////
@@ -83,11 +108,7 @@ fn add_blocks(block: Json<Block<Message>>, app: State<Mutex<App>>) -> JsonValue 
 
     match app.add_block(block.0) {
         Ok(()) => json!({"status":"ok"}),
-        Err(_err) =>             // ToDo: add reason why add block failed
-            json!({
-                "status":"err",
-                "err":"Couldn't add block to blockchain: [TODO: add reason]"
-            })
+        Err(err) => json!({ "status":"err", "err":err.to_string() }),
     }
 }
 
@@ -98,11 +119,7 @@ fn get_blocks_starting(index: usize, app: State<Mutex<App>>) -> JsonValue {
 
     match app.get_blocks_from(index) {
         Ok(blocks) => json!(blocks),
-        Err(_err) =>         // ToDo: add reason why retrieving blocks failed
-            json!({
-                "status":"err",
-                "err":"Couldn't retrieve blocks: [todo: add reason]"
-            }),
+        Err(err) => json!({ "status":"err", "err":err.to_string() }),
     }
 }
 
@@ -116,11 +133,7 @@ fn get_genesis_block(app: State<Mutex<App>>) -> JsonValue {
             "genesis":block,
             "hash":block.hash()
         }),
-        Err(_err) =>         // ToDo: add reason why retrieving blocks failed
-            json!({
-                "status":"err",
-                "err":"Couldn't retrieve genesis blocks: [todo: add reason]"
-            }),
+        Err(err) => json!({ "status":"err", "err":err.to_string() }),
     }
 }
 
@@ -134,11 +147,7 @@ fn get_last_block(app: State<Mutex<App>>) -> JsonValue {
             "genesis":block,
             "hash":block.hash()
         }),
-        Err(_err) =>         // ToDo: add reason why retrieving blocks failed
-            json!({
-                "status":"err",
-                "err":"Couldn't retrieve last blocks: [todo: add reason]"
-            }),
+        Err(err) => json!({ "status":"err", "err":err.to_string() }),
     }
 }
 
@@ -152,7 +161,6 @@ fn generate_new_block(app: State<Mutex<App>>) -> JsonValue {
 
     json!(block)
 }
-
 
 
 ////////////////////// Miner ////////////////////////////////
@@ -185,7 +193,7 @@ fn get_nonce(block_header: Json<BlockHeader>, app: State<Mutex<App>>) -> Option<
 /// ToDo:
 /// - ?? Control App ??
 fn blockchain_control(command: String, app: State<Mutex<App>>) -> Option<JsonValue> {
-    let app = app.lock().expect("Block: App Lock");
+    let app = app.lock().expect("Blockchain: App Lock");
 
     match command.as_str() {
         "backup" => { app.save_blockchain(); Some(json!({"status":"ok"})) },
@@ -196,18 +204,84 @@ fn blockchain_control(command: String, app: State<Mutex<App>>) -> Option<JsonVal
 
 
 
-///
-/// Says hello.
-///
+////////////////////// App ////////////////////////////////
+
+#[get("/info")]
+/// Gets app info
+fn get_app_info(app: State<Mutex<App>>) -> JsonValue {
+    let app = app.lock().expect("Block: App Lock");
+
+    json!(app.get_app_info())
+}
+
+#[get("/auto/<miner>")]
+/// Automatically generates block (gets new -> mines -> adds to blockchain)
+fn auto_block(miner: Option<String>, app: State<Mutex<App>>) -> Option<JsonValue> {
+    let mut app = app.lock().expect("Blockchain: App Lock");
+    let mut block = app.generate_next_block();
+
+    block.add_record(app.get_miners_reward_message(miner));
+
+    let nonce = Miner::new(&block.header).start_thread().join().unwrap();
+
+    block.header.set_nonce(nonce);
+    app.add_block(block).ok()?;
+
+    Some(json!({"status":"ok"}))
+}
+
+#[get("/auto")]
+/// Automatically generates block for the random user (gets new -> mines -> adds to blockchain)
+fn auto_block_random_user(app: State<Mutex<App>>) -> Option<JsonValue> {
+    let mut app = app.lock().expect("Blockchain: App Lock");
+    let mut block = app.generate_next_block();
+    let miners = app.get_users_list();
+    let mut rng = thread_rng();
+    let n: usize = rng.gen_range(0, miners.len());
+    let random_miner = miners[n].clone();
+
+    block.add_record(app.get_miners_reward_message(Some(random_miner.clone())));
+
+    let nonce = Miner::new(&block.header).start_thread().join().unwrap();
+
+    block.header.set_nonce(nonce);
+    app.add_block(block).ok()?;
+
+    Some(json!({"status":"ok", "miner": random_miner}))
+}
+
+
+
+
 #[get("/")]
+/// Says "Hell". (debugging)
 fn world() -> &'static str {
     "App says: Hello!"
 }
 
-///
-/// builds "Rocket"
-///
+
+
+
+
+/// Builds "Rocket" - prepares for the "launch"
 fn rocket() -> Result<Rocket, Box<dyn error::Error>> {
+    // CORS related code
+//    let (allowed_origins, failed_origins) = AllowedOrigins::some(&[
+//        "https://www.acme.com",
+//        "http://localhost:8080",
+//        "http://192.168.1.2:8080",
+//    ]);
+
+    // You can also deserialize this
+    let cors = rocket_cors::Cors {
+//        allowed_origins,
+        allowed_methods: vec![Method::Get, Method::Post, Method::Options].into_iter().map(From::from).collect(),
+        allow_credentials: true,
+        ..Default::default()
+    };
+
+
+
     let config = match Config::from(app::CONFIG_FILE){
         Ok(content) => content,
         Err(_err) => {
@@ -225,14 +299,18 @@ fn rocket() -> Result<Rocket, Box<dyn error::Error>> {
             world,
             // message
             add_message, get_pending_messages, get_messages_user,
+            get_messages, add_message_user,
             // blocks
             add_blocks, get_blocks_starting,
             get_genesis_block, get_last_block, generate_new_block,
             // miner
             get_nonce,
             blockchain_control,
+            // app
+            get_app_info, auto_block, auto_block_random_user,
     ])
-        .manage(Mutex::new(app));
+        .manage(Mutex::new(app))
+        .attach(cors);
 
     Ok(rocket)
 }
