@@ -9,6 +9,7 @@ export default new Router({
     {
       path: '/',
       name: 'home',
+      props: true,
       component: Home
     },
     {
@@ -23,6 +24,12 @@ export default new Router({
       path: '/info',
       name: 'info',
       component: () => import('./views/Info.vue')
+    },
+    {
+      path: '/addressBook',
+      name: 'addressBook',
+      props: true,
+      component: () => import('./views/AddressBook.vue')
     }
   ]
 })

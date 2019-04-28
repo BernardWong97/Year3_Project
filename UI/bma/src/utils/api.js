@@ -35,6 +35,10 @@ class APIProvider {
         })
     }
 
+    getInfo(){
+        return http.get('/info')
+    }
+
     postMessage({message}){
         return http.post('/message', message)
     }

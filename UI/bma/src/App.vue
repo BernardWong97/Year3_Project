@@ -1,18 +1,19 @@
 <template>
-  <div id="app">
-    <Header style="height:30%"/>
-    <router-view/>
-  </div>
+    <div id="app">
+        <Header style="height:30%"/>
+        <router-view/>
+    </div>
 </template>
 
 <script>
-  import Header from '@/components/Header.vue'
+    import Header from '@/components/Header.vue'
 
-  export default {
-    components: {
-      Header,
+    export default {
+        components: {
+            Header,
+        },
+
     }
-  }
 </script>
 
 <style>
