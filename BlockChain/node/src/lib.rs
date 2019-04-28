@@ -27,7 +27,7 @@ impl<T> Node <T> {
     }
 
     ///
-    /// Send the message to the ip's machine socket
+    /// Send the message to the ip's machine socket.
     ///
     pub fn send_message(&self, ip_address: &'static str, message: String) {
         let self_local_ip = local_ip::get().unwrap().to_string();
@@ -52,6 +52,7 @@ impl<T> Node <T> {
 
     ///
     /// Check the connectivity of the ip's machine server node
+    /// Send "ping" to the ip's server and wait for ping reply.
     ///
     pub fn ping_server(&self, ip_address: &'static str) {
         let self_local_ip = local_ip::get().unwrap().to_string();
@@ -90,6 +91,8 @@ impl<T> Node <T> {
 
     ///
     /// The server initialization function
+    /// Listen to port 6000 of any ip address and read data received from socket.
+    /// If data is ping, ping back to the ip address.
     ///
     pub fn server(&self) {
         let listener = TcpListener::bind("0.0.0.0:6000").unwrap();
