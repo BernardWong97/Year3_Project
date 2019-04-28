@@ -5,6 +5,8 @@ authors = ["Mindaugas Sharskus <g00339629@gmit.ie>"]
 edition = "2018"
 
 [dependencies]
+itertools = "0.8.0"
+rand = "0.6.5"
 uuid = { version = "0.7", features = ["v4", "serde"] }
 # hashing
 sha2 = "0.8"

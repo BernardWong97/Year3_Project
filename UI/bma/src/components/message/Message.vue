@@ -1,5 +1,5 @@
 <template>
-    <div class="w3-card-4 w3-margin-top w3-margin-left w3-margin-right w3-round-xlarge w3-center"
+    <div class="w3-card-4 w3-margin-top w3-margin-left w3-margin-right w3-round-xlarge w3-animate-bottom w3-center"
          style="width:70%"
          v-bind:class="{'w3-right': isUserMessage, 'w3-left': !isUserMessage}"
     >

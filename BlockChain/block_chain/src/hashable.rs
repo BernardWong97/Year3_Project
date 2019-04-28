@@ -1,3 +1,11 @@
+//!
+//! This is utility class.
+//!
+//! ToDo:
+//! - remove it. redesign.
+
+
+
 ////////////////////////////// Hash type ////////////////////////////
 
 const HASH_BYTE_SIZE: usize = 32;

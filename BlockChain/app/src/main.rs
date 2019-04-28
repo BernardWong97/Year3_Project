@@ -6,10 +6,9 @@
 //!
 //! ToDo (improvements):
 //! - ?? get transactions from particular time stamp instead of getting all pending.
-//! ~~- Create custom error for pass error information.~~
 //! - Error should implement rocket::Response
 //! - add endpoint to create message from given details
-//! - add limit message get amount( sort by timestamp)
+//! - add limit message get amount (sort by timestamp)
 
 
 #![feature(proc_macro_hygiene, decl_macro)]
@@ -19,17 +18,24 @@
 extern crate reqwest;
 extern crate rocket_cors;
 
-use reqwest::Client;
+use reqwest::{Client, StatusCode};
 
-use rocket::{Rocket, State};
+use rocket::{Rocket, State, Response, response::status};
 use rocket_contrib::json::{JsonValue, Json};
 use rocket::config::{Environment};
 use rocket::http::Method;
+use rocket::http::ContentType;
+use rocket::http::Status;
+use rocket::request::Request;
+use rocket::response::{self, Responder};
 //use rocket_cors::{AllowedHeaders, AllowedOrigins, Error};
 
 use std::error;
 use std::sync::Mutex;
 use std::fs;
+use std::io::Cursor;
+use std::error::Error;
+use rand::{thread_rng, Rng};
 
 use app::{App, MessageTemplate, AppError};
 use app::config::Config;
@@ -41,18 +47,16 @@ use miner::Miner;
 
 
 
-
 ////////////////////// Messages /////////////////////////////////
 
 #[post("/message", format = "json", data = "<message>")]
 /// Adds Message to the pending list
-fn add_message(message: Json<MessageTemplate>, app: State<Mutex<App>>) -> JsonValue {
+fn add_message(message: Json<MessageTemplate>, app: State<Mutex<App>>) -> Result<JsonValue, Status> {
     let mut app = app.lock().expect("Message: App Lock.");
 
-    match app.add_message(None, message.0) {
-        Ok(_) => json!({ "status":"ok", "msg":"Message was added to the message queue." }),
-        Err(err) => json!({ "status":"err", "err": err.to_string() }),
-    }
+    app.add_message(None, message.0)
+        .map(|_|json!({ "status":"ok", "msg":"Message was added to the message queue." }))
+        .map_err(|e| Status::ExpectationFailed)
 }
 
 #[post("/message/<user>", format = "json", data = "<message>")]
@@ -92,7 +96,6 @@ fn get_messages_user(user: String, app: State<Mutex<App>>) -> Option<JsonValue> 
 
     app.get_messages(Some(user.as_str())).map(|val| json!(val))
 }
-
 
 
 
@@ -208,7 +211,6 @@ fn blockchain_control(command: String, app: State<Mutex<App>>) -> Option<JsonVal
 fn get_app_info(app: State<Mutex<App>>) -> JsonValue {
     let app = app.lock().expect("Block: App Lock");
 
-
     json!(app.get_app_info())
 }
 
@@ -228,13 +230,31 @@ fn auto_block(miner: Option<String>, app: State<Mutex<App>>) -> Option<JsonValue
     Some(json!({"status":"ok"}))
 }
 
+#[get("/auto")]
+/// Automatically generates block for the random user (gets new -> mines -> adds to blockchain)
+fn auto_block_random_user(app: State<Mutex<App>>) -> Option<JsonValue> {
+    let mut app = app.lock().expect("Blockchain: App Lock");
+    let mut block = app.generate_next_block();
+    let miners = app.get_users_list();
+    let mut rng = thread_rng();
+    let n: usize = rng.gen_range(0, miners.len());
+    let random_miner = miners[n].clone();
+
+    block.add_record(app.get_miners_reward_message(Some(random_miner.clone())));
+
+    let nonce = Miner::new(&block.header).start_thread().join().unwrap();
+
+    block.header.set_nonce(nonce);
+    app.add_block(block).ok()?;
+
+    Some(json!({"status":"ok", "miner": random_miner}))
+}
 
 
 
-///
-/// Says hello.
-///
+
 #[get("/")]
+/// Says "Hell". (debugging)
 fn world() -> &'static str {
     "App says: Hello!"
 }
@@ -242,12 +262,10 @@ fn world() -> &'static str {
 
 
 
-///
-/// builds "Rocket"
-///
+
+/// Builds "Rocket" - prepares for the "launch"
 fn rocket() -> Result<Rocket, Box<dyn error::Error>> {
-
-
+    // CORS related code
 //    let (allowed_origins, failed_origins) = AllowedOrigins::some(&[
 //        "https://www.acme.com",
 //        "http://localhost:8080",
@@ -289,7 +307,7 @@ fn rocket() -> Result<Rocket, Box<dyn error::Error>> {
             get_nonce,
             blockchain_control,
             // app
-            get_app_info, auto_block,
+            get_app_info, auto_block, auto_block_random_user,
     ])
         .manage(Mutex::new(app))
         .attach(cors);

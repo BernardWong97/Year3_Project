@@ -9,6 +9,8 @@
 //! - append changes to file instead overwriting it each time blockchain is saved.
 //! - implement floating points for the transaction (message) cost
 //! - Add ability to send crypto credits with the message
+//! - replace `Error`s with correct and meaningful `AppError`
+//! - write tests
 
 
 pub mod config;
@@ -22,18 +24,19 @@ use std::fs;
 use std::fmt;
 use std::io;
 use std::convert;
-
 use std::io::{Write, Read};
 
 use core::fmt::Display;
 
+use uuid::Uuid;
 use serde::{Deserialize, Serialize, Serializer};
+use core::borrow::Borrow;
+use itertools::Itertools;
+
 use block_chain::{BlockChain, Block};
 use block_chain::transaction::{Transaction, TransactionID};
 use node::Node;
 use miner::Miner;
-use core::borrow::Borrow;
-use uuid::Uuid;
 
 pub const CONFIG_FILE:&'static str = "settings_file.txt";
 
@@ -68,19 +71,15 @@ pub struct AppInfo<'i> {
     message_send_cost: usize,
 }
 
-//#[derive(Serialize, Deserialize, Debug)]
 pub struct App <'a>{
-    /// config:
-    /// - blockchain_file,
-    /// - node_settings,
     pub config: Config<'a>,
     blockchain: BlockChain<Message>,
     node: Node<String>,
-//    miner: Miner<'a>,
 }
 
 #[allow(dead_code)]
 impl<'a> App<'a> {
+    /// Create an `App` instance. Require `settings.txt` - stored app settings.
     pub fn create(config:Config<'a>) -> Result<Self, Box<dyn Error>> {
         let uri = config.get_value(KEY_BLOCKCHAIN_FILE)
             .ok_or("Blockchain backup file is not given")?;
@@ -105,29 +104,16 @@ impl<'a> App<'a> {
         Ok(this)
     }
 
-    fn verify_config(config: &Config<'a>) -> Result<(), Box<dyn Error>>{
-        let app_configs = vec![
-            KEY_APP_USER,         // will be used as `sender` in message
-            KEY_MINER_URL,
-            KEY_BLOCKCHAIN_FILE,
-        ];
-
-        Ok(())
-    }
-
-    pub fn save(&self) -> Result<(), Box<dyn Error>> {
-        Ok(())
-    }
-
+    /// Connects to the network. (WIP)
     pub fn connect_to_network(&self) -> Result<(), Box<dyn Error>> {
         self.node.connect()
     }
 
 
+
     /////////////////////////////// App /////////////////////////////////
 
-
-
+    /// Gets app info for the app user.
     pub fn get_app_info(&self) -> AppInfo{
         let username = self.config.get_value(KEY_APP_USER)
             .unwrap();
@@ -147,6 +133,7 @@ impl<'a> App<'a> {
         }
     }
 
+    /// Gets given user balance.
     pub fn get_user_balance(&self, username: &str) -> i64 {
         let blockchain_uuid = self.blockchain.get_uuid();
 
@@ -180,6 +167,21 @@ impl<'a> App<'a> {
 
         (block_rewards + message_rewards) as i64 -messages_costs as i64 -pending_cost as i64
     }
+
+    /// Gets all blockchain users. Collects unique senders an receivers.
+    pub fn get_users_list(&self) -> Vec<String> {
+        let blockchain_uuid = self.blockchain.get_uuid().to_hyphenated().to_string();
+        let list = self.blockchain.get_blocks_starting_at(0usize)
+            .unwrap_or(&vec![]).iter()
+            .flat_map(|block| block.load.iter())
+            .flat_map(|trx| vec![trx.sender.clone(), trx.receiver.clone()].into_iter())
+            .filter(|user| user != &blockchain_uuid )
+            .unique()
+            .collect::<Vec<_>>();
+
+        list
+    }
+
 
 
     /////////////////////////////// Messages /////////////////////////////////
@@ -288,7 +290,7 @@ impl<'a> App<'a> {
 
 
 
-    /////////////////////////////// Block /////////////////////////////////
+    /////////////////////////////// Blockchain /////////////////////////////////
 
     /// Saves `BlockChain` to the file `KEY_BLOCKCHAIN_FILE`
     pub fn save_blockchain(&self) -> Result<(), Box<dyn Error>> {

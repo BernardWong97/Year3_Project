@@ -9,7 +9,7 @@
 <!--        <button v-on:click="getMessages">get</button>-->
 <!--        <Messages v-bind:data="messages.get(buddy)"/>-->
         <Messages v-bind:conversation="conversation"/>
-        <MessageSend class="w3-bottom"/>
+        <MessageSend v-bind:user="conversation.user" class="w3-bottom"/>
 <!--        <HelloWorld msg="Welcome to Your Vue.js App"/>-->
     </div>
 </template>
@@ -92,7 +92,7 @@
             this.conversationWith({user: this.user})
             this.addressBook = this.messages.keys()
 
-            console.log(this.addressBook)
+            // console.log(this.addressBook)
             // console.log(this.conversation)
 
         }

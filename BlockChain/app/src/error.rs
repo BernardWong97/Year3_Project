@@ -4,9 +4,13 @@
 //! # author: Mindaugas Sharskus
 //! # date: 25-04-2019
 //!
+//! ToDo: (enchantments)
+//! - implement needed trait to allow error pass as `Rocket` response.
+
 
 use std::{error, fmt, convert, io};
 use serde::{Deserialize, Serialize};
+
 
 #[derive(Debug, Serialize)]
 pub struct AppError{

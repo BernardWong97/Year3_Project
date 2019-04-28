@@ -1,13 +1,15 @@
 //!
 //! Block miner
 //!
-//! Author: Mindaugas Sharskus
-//! date: 31-03-2019
+//! # author: Mindaugas Sharskus
+//! # date: 31-03-2019
 //!
 //! Reference:
 //!     Lifetimes:
 //!         https://doc.rust-lang.org/1.30.0/book/second-edition/ch19-02-advanced-lifetimes.html
 //!
+//! Todo: (enchantments)
+//! - create multi threaded miner.
 
 use std::thread;
 

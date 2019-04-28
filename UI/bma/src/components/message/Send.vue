@@ -41,9 +41,9 @@
 <script>
     export default {
         name: "Send",
+        props: ["user"],
         data() {
             return {
-                receiver: '',
                 text: '',
                 message: '',
                 msgShow: false,
@@ -56,7 +56,7 @@
             sendMessage: function () {
                 this.$api.postMessage({
                     message: {
-                        receiver: this.receiver,
+                        receiver: this.user,
                         text: this.text,
                         value: 0,
                     }

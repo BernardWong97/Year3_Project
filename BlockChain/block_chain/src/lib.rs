@@ -5,7 +5,7 @@
 //!
 //! TODO (improvements):
 //! - ?? Implement merkle tree functionality fo transaction confirmation.
-//! - ?? Create `BlockChainError` to handle `BlockChain` errors.
+//! - ?? Create `BlockchainError` to handle `BlockChain` errors.
 //! - hide public fields
 
 
