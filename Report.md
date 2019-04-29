@@ -1,7 +1,23 @@
 # Report
- 
+
 ## A small follow-up report for the project
-### Summary of what we did in the past weeks for the project
+### Summary of what we did for the project
+
+At first, before we even decide what are we going to do for the project, we came up some few ideas:
+- Data mining
+- Blockchain &#x2611;
+
+Set up some project goals:
+- Multilingual project
+- Learn a new language:
+  - Rust &#x2611;
+  - Bash
+  - Python
+  - Scala
+- Use Docker (Kubernetes) &#x2611;
+
+Then we decide Rust and Blockchain.
+
 #### Week 1 - 2 (4<sup>th</sup> February 2019 - 15<sup>th</sup> February 2019)
     We planned a week to learn and understand the fundamental of Rust Programming Language before diving straight into
     the project but we underestimate the complexity of it as it is one of the low level programming language.  
@@ -16,7 +32,7 @@
     - Ask question on StackOverflow.
 #### Week 3 (18<sup>th</sup> February 2019 - 22<sup>th</sup> February 2019)
     We pushed the Blockchain implementation to this week as we spent two weeks on the programming language itself.
-    
+
     We discussed about multiple issues arise during the implementation:
     - Data that stored inside transactions of the block:
         - Was planning to do some universities blockchain for students' data.
@@ -27,7 +43,7 @@
     - Split the project into two parts:
         - Blockchain itself ( assigned to Mindaugas )
         - Blockchain decentralized network ( assigned to Bernard )
-        
+
     Mindaugas worked on serialization and hashing.
 #### Week 4 (25<sup>th</sup> February 2019 - 1<sup>st</sup> March 2019)
     Discussed that we decided to allow our Blockchain to be used for sending messages (JSON).
@@ -37,7 +53,7 @@
     - Researched on peer to peer BlockChain network from videos and Go programming language reference.
     - Developed a server/client application by referencing tutorials.  
     - Created a branch named "peer2peer" focusing on developing and learning peer to peer application.
-    
+
     Mindaugas:
     - Researched on available Rust crypto crates:
         - rust-crypto
@@ -59,7 +75,7 @@
     Mindaugas:
     - Watched few Youtube videos about Rust.
     - Taking down project's external obstacles -> doing other subject's project.
-    
+
     Bernard:
     - Study Rust error handling.
     - Adviced to use threading rather than spawning processes on networking.
@@ -70,17 +86,17 @@
 #### Week 7 - 8 (18<sup>th</sup> March 2019 - 25<sup>th</sup> March 2019)
     We discussed the usage MVC/MVVM concept.
     Decided to use a controller to link between components (view/network/Blockchain)
-    
+
     Mindaugas:
     - Did some code clean-up.
     - Merged learning and blockchain branches to master.
     - Created skeleton for the Blockchain node.
-    
+
     Bernard:
     - Peer2peer branch crate's function broke after Rust update.
         - seems to be a problem passing static variables into functions.
     - Learned that connections through router's public IP need to port forward the router
-    - Discussed with Mindaugase and decided to make network local.
+    - Discussed with Mindaugas and decided to make network local.
     - Created 1 virtual machine to test the network connections.
         - currently only did test between 1 virtual machine and host machine.  
     - Did some documentation, will polish it more.

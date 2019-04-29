@@ -1,102 +1,38 @@
-### About
-This repository is for Year 3 group project.  
-Project Idea is to learn Rust Programming Language while creating a BlockChain program using Rust and possibly build into a Xamarin App or deploy into Docker for data access.
+# Introduction
 
-### Project ideas
-Here are a few ideas we have/had:
-- Data mining
-- Blockchain &#x2611;
+This repository is for our Year 3 group project that helps us experience what it takes to work as a team like in a company assigning a team project.  
+Project's goal is to learn [Rust Programming Language](https://www.rust-lang.org/) and [Blockchain](https://en.wikipedia.org/wiki/Blockchain) technology using Rust by researching and building Blockchain using Rust.
 
-Few personal goals:
-- Multilingual project
-- Learn a new language:
-  - Rust &#x2611;
-  - Bash
-  - Python
-  - Scala
-- Use Docker (Kubernetes)
+# Project Architecture
 
-### About Rust
-Rust is a statically typed language.
-- ["The primary situation in which you’d use `isize` or `usize` is when indexing some sort of collection."](https://doc.rust-lang.org/book/ch03-02-data-types.html)
-- ["This is called destructuring because it breaks the single tuple into three parts."](https://doc.rust-lang.org/book/ch03-02-data-types.html)
+```
+project
+│   BlockChain
+|   └─── The main application of the project
+│   Learning
+|   └─── Storing miniature projects that we develop while learning Rust
+|   UI
+|   └─── The User Interface of the project application
+│   README.md
+|   Report.md
+|   developers-diary.md
+```
 
-### About BlockChain
+# Application Demonstration Video
 
-Parts:
-- Block:
-  - Block Header:
-    - A hash of the previous header
-    - A timestamp
-    - A mining difficulty value
-    - A proof of work nonce
-    - A root hash for the Merkle tree containing the transactions for that block.
+Below is a demonstration video on how our application works, click the thumbnail below and you will be redirect to Youtube and watch the video.
 
-  - **nonce**:  A 64-bit hash, which proves, combined with the mix-hash, that a sufficient amount of computation has been carried out on this block.
+[![Blockchain Messaging App Demo Video](https://img.youtube.com/vi/OYa_496Ofg4/hqdefault.jpg)](https://www.youtube.com/watch?v=OYa_496Ofg4 "Demo Video - Click to Watch!")
 
-  - **timestamp**: A scalar value equal to the reasonable output of Unix time() function at this block inception.
+# More information
 
-  - **mixhash**: A 256-bit hash which proves, combined with the nonce, that a sufficient amount of computation has been carried out on this block.
+For more information about the project, below are some links to redirect to their corresponding pages:
 
-  - **difficulty**: A scalar value corresponding to the difficulty level applied during the nonce discovering of block.
-
-  - **alloc**: Allows defining a list of pre-filled wallets. It’s an Ethereum specific functionality to handle the “Ether pre-sale” period.
-
-  - **parentHash**: The Keccak 256-bit hash of the entire parent block header (including its nonce and mixhash).
-
-  - **extraData**: An optional free, but max. 32-byte long space to conserve smart things for ethernity.
-
-  - **gasLimit**: A scalar value equal to the current chain-wide limit of Gas expenditure per block.
-
-  - **coinbase**: The very first transaction included in the block by the miners.
-
-  - **merkle**: A merkle tree, also known as a binary hash tree, is a data structure used for efficiently summarizing and verifying the integrity of large sets of data. - quote Andreas M. Antonopoulos
-
-
-
-
-### Resources
-##### Docker
-- [**What is docker** Learn Enough Docker to be Useful 1.](https://towardsdatascience.com/learn-enough-docker-to-be-useful-b7ba70caeb4b)
-- [**Docker terminology** Learn Enough Docker to be Useful 2.](https://towardsdatascience.com/learn-enough-docker-to-be-useful-1c40ea269fa8)
-- [**Docker files** Learn Enough Docker to be Useful 3.](https://towardsdatascience.com/learn-enough-docker-to-be-useful-b0b44222eef5)
-- [Docker Tutorial for Beginners](https://hashnode.com/post/docker-tutorial-for-beginners-cjrj2hg5001s2ufs1nker9he2)
-
-##### Big Data
-- [Deep learning with Python](https://towardsdatascience.com/deep-learning-with-python-703e26853820)
-
-##### BlockChain
-- [Creating Your First Blockchain with Java 1.](https://medium.com/programmers-blockchain/create-simple-blockchain-java-tutorial-from-scratch-6eeed3cb03fa)
-- [Creating Your First Blockchain with Java 2.](https://medium.com/programmers-blockchain/creating-your-first-blockchain-with-java-part-2-transactions-2cdac335e0ce)
-- [Blockchain Tutorial – A Beginner’s Guide to Blockchain Technology](https://www.edureka.co/blog/blockchain-tutorial/)
-- [Merkle Trees](https://www.blockchain-council.org/blockchain/what-is-merkel-tree-merkel-root-in-blockchain/)
-- [Blockchain Fundamentals #1: What is a Merkle Tree?](https://medium.com/byzantine-studio/blockchain-fundamentals-what-is-a-merkle-tree-d44c529391d7)
-- [Merkling in Ethereum](https://blog.ethereum.org/2015/11/15/merkling-in-ethereum/)
-- [Blockchain in Python](https://hackernoon.com/learn-blockchains-by-building-one-117428612f46). Uses HTTP.
-- [Blockchain network in GO](https://medium.com/@mycoralhealth/code-a-simple-p2p-blockchain-in-go-46662601f417)
-
-##### Rust language
-- [The Book](https://doc.rust-lang.org/book/ch01-00-getting-started.html)
-- [24 days of Rust](http://zsiciarz.github.io/24daysofrust/book/vol1/index.html)
-- [Rust Docks](https://doc.rust-lang.org/1.2.0/book/ffi.html)
-- [Rust SHA256 - crates.io](https://crates.io/crates/byte_sha)
-- [Rust String conversions](https://stackoverflow.com/questions/41034635/idiomatic-transformations-for-string-str-vecu8-and-u8)
-- [Bitcoin Hashes Library](https://crates.io/crates/bitcoin_hashes)
-- [New in Rust 1.31 / Rust2018](https://blog.rust-lang.org/2018/12/06/Rust-1.31-and-rust-2018.html)
-- [Rust2018](https://rust-lang-nursery.github.io/edition-guide/rust-2018/cargo-and-crates-io/cargo-can-use-a-local-registry-replacement.html)
-- [New in Rust 1.32](https://blog.rust-lang.org/2019/01/17/Rust-1.32.0.html)
-- [Use Rust from Java](https://github.com/sureshg/java-rust-ffi)
-- [Rust Awesome List](https://github.com/rust-unofficial/awesome-rust#cryptocurrencies)
-- [Regex in Rust](https://docs.rs/regex/1.1.0/regex/)
-- [Rust Youtube Tutorial Playlist](https://www.youtube.com/playlist?list=PLJbE2Yu2zumDF6BX6_RdPisRVHgzV02NW)
-- [Rust Chat Application](https://steemit.com/technology/@tensor/rust-project-native-chat-app)
-- [Nice talk about OS's and what value Rust can add to them](https://www.youtube.com/watch?v=HgtRAbE1nBM)
-- [Talk about rus from Rocket crate developer](https://www.youtube.com/watch?v=cDFSrVhnZKo)
-- [Cuncurency in Rust `Send` & `Sync`](https://doc.rust-lang.org/nomicon/send-and-sync.html)
-- [Sending JSON over websockets in Rust](https://thomask.sdf.org/blog/2017/07/02/sending-json-over-websockets-in-rust.html)
-
-**API in Rust**:
-- [Rocket + Diesel](https://dzone.com/articles/creating-a-rest-api-in-rust-using-rocket-and-diese) (Dzone)
-- [Rest API in Rust](https://dev.to/gruberb/web-development-with-rust-03-x-create-a-rest-api-3i82) (dev.to)
-- [Building CRUD API in Rust](https://medium.com/sean3z/building-a-restful-crud-api-with-rust-1867308352d8) (Medium)
-- [Rust for the Web](https://medium.com/@eugeniyoz/restful-api-in-rust-impressions-63250d611d15) (Medium)
+- [Wiki Home Page](https://gitlab.com/My-/year3_project/wikis/home) - Support Documentation for the project.
+- [Wiki Setup Page](https://gitlab.com/My-/year3_project/wikis/how-to-setup) - Guides on how to setup the application.
+- [Resources and Links Page](https://gitlab.com/My-/year3_project/wikis/resources) - Links on some resources and research websites we used throughout the project.
+- [Report.md](https://gitlab.com/My-/year3_project/blob/master/Report.md) - A weekly report of what we did for the project.
+- [developers-diary.md](https://gitlab.com/My-/year3_project/blob/master/developers-diary.md) - A diary for us to record our works daily.
+- Presentation slides:
+  - [Google Slides](https://drive.google.com/open?id=1qBSy8EAtHSHKXRElihc-wta0BA7zMLGbYQYp9dEuJJs)
+  - [Power Point]()
