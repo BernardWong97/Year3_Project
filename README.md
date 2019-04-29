@@ -13,6 +13,7 @@ project
 |   └─── Storing miniature projects that we develop while learning Rust
 |   UI
 |   └─── The User Interface of the project application
+|   Blockchain in Rust.pptx
 │   README.md
 |   Report.md
 |   developers-diary.md
@@ -35,4 +36,4 @@ For more information about the project, below are some links to redirect to thei
 - [developers-diary.md](https://gitlab.com/My-/year3_project/blob/master/developers-diary.md) - A diary for us to record our works daily.
 - Presentation slides:
   - [Google Slides](https://drive.google.com/open?id=1qBSy8EAtHSHKXRElihc-wta0BA7zMLGbYQYp9dEuJJs)
-  - [Power Point]()
+  - [Power Point](https://gitlab.com/My-/year3_project/blob/master/Blockchain%20in%20Rust.pptx)
