@@ -105,9 +105,7 @@ impl<'a> App<'a> {
     }
 
     /// Connects to the network. (WIP)
-    pub fn connect_to_network(&self) -> Result<(), Box<dyn Error>> {
-        self.node.connect()
-    }
+    //pub fn connect_to_network(&self) -> Result<(), Box<dyn Error>> {self.node.connect()}
 
 
 
