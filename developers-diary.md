@@ -177,3 +177,11 @@ Found an issue of the crate that it cannot send single string but need to wrap i
 #### 24-04-2019
 Changes from mpsc channelling to TCP stream channelling.  
 Study on how to [send JSON over websockets](https://thomask.sdf.org/blog/2017/07/02/sending-json-over-websockets-in-rust.html)
+
+#### 25-04-2019 to 28-04-2019
+Building UI in [Vue v2](https://vuejs.org/v2/guide/). <p/>
+Refactored API just to be able show some demos. <p/>
+Prepared for presentation.
+
+#### 25-04-2019
+Presentation day.
